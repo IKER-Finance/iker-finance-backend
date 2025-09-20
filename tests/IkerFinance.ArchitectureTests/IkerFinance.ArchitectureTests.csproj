@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IkerFinance.Domain\IkerFinance.Domain.csproj" />
+    <ProjectReference Include="..\..\src\IkerFinance.Application\IkerFinance.Application.csproj" />
+    <ProjectReference Include="..\..\src\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\IkerFinance.API\IkerFinance.API.csproj" />
+  </ItemGroup>
+
+</Project>
