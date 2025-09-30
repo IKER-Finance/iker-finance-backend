@@ -6,6 +6,7 @@ using IkerFinance.Infrastructure.Data;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Infrastructure.Services.Authentication;
+using IkerFinance.Infrastructure.Services;
 
 namespace IkerFinance.Infrastructure;
 
@@ -18,6 +19,9 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly("IkerFinance.Infrastructure")
             ));
+
+        services.AddScoped<IApplicationDbContext>(provider => 
+            provider.GetRequiredService<ApplicationDbContext>());
 
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
         {
@@ -40,6 +44,7 @@ public static class DependencyInjection
         .AddDefaultTokenProviders();
 
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         
         return services;
     }
