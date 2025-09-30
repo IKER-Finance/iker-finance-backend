@@ -1,4 +1,5 @@
 using IkerFinance.API.Extensions;
+using IkerFinance.API.Middleware;
 using IkerFinance.Application;
 using IkerFinance.Infrastructure;
 using IkerFinance.Infrastructure.Data;
@@ -11,6 +12,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
