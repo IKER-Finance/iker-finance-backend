@@ -15,9 +15,3 @@ public class CreateBudgetCommand : IRequest<BudgetDto>
     public List<BudgetCategoryAllocation> CategoryAllocations { get; set; } = new();
     public string? Description { get; set; }
 }
-
-public class BudgetCategoryAllocation
-{
-    public int CategoryId { get; set; }
-    public decimal Amount { get; set; }
-}

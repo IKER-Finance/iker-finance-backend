@@ -17,9 +17,3 @@ public class UpdateBudgetCommand : IRequest<BudgetDto>
     public string? Description { get; set; }
     public bool IsActive { get; set; }
 }
-
-public class BudgetCategoryAllocation
-{
-    public int CategoryId { get; set; }
-    public decimal Amount { get; set; }
-}
