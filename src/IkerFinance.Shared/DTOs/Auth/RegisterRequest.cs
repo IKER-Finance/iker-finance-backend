@@ -1,5 +1,3 @@
-using IkerFinance.Domain.Entities;
-
 namespace IkerFinance.Shared.DTOs.Auth;
 
 public class RegisterRequest
@@ -9,6 +7,6 @@ public class RegisterRequest
     public string ConfirmPassword { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public Currency HomeCurrency { get; set; } = Currency.SEK;
+    public int HomeCurrencyId { get; set; }
     public string? PreferredLanguage { get; set; }
 }

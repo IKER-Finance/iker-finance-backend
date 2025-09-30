@@ -29,12 +29,7 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        await DataSeeder.SeedRolesAsync(serviceProvider);
-        
-        if (app.Environment.IsDevelopment())
-        {
-            await DataSeeder.SeedTestUsersAsync(serviceProvider);
-        }
+        await DataSeeder.SeedAsync(serviceProvider);
     }
     catch (Exception ex)
     {
