@@ -3,6 +3,7 @@ using IkerFinance.API.Middleware;
 using IkerFinance.Application;
 using IkerFinance.Infrastructure;
 using IkerFinance.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +16,8 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -32,12 +30,14 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
+        var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+        await context.Database.MigrateAsync();
         await DataSeeder.SeedAsync(serviceProvider);
     }
     catch (Exception ex)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred while migrating/seeding the database.");
     }
 }
 

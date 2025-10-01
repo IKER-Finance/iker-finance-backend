@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 10000
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["src/IkerFinance.API/IkerFinance.API.csproj", "src/IkerFinance.API/"]
+COPY ["src/IkerFinance.Application/IkerFinance.Application.csproj", "src/IkerFinance.Application/"]
+COPY ["src/IkerFinance.Infrastructure/IkerFinance.Infrastructure.csproj", "src/IkerFinance.Infrastructure/"]
+COPY ["src/IkerFinance.Domain/IkerFinance.Domain.csproj", "src/IkerFinance.Domain/"]
+COPY ["src/IkerFinance.Shared/IkerFinance.Shared.csproj", "src/IkerFinance.Shared/"]
+
+RUN dotnet restore "src/IkerFinance.API/IkerFinance.API.csproj"
+COPY . .
+WORKDIR "/src/src/IkerFinance.API"
+RUN dotnet build "IkerFinance.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "IkerFinance.API.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "IkerFinance.API.dll"]

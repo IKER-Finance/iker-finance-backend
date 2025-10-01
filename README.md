@@ -1,9 +1,21 @@
 # IKER Finance - Backend API
-
 The server-side application that powers IKER Finance. This handles all the data storage, user accounts, security, and business logic for the personal finance management system.
 
-## What This Backend Does
+## Live Demo & Access
 
+### Hosted Environment
+- **Live API Documentation**: https://iker-finance.onrender.com/swagger
+- **API Base URL**: https://iker-finance.onrender.com/api/v1/
+
+**Note**: Deployed on Render's free tier for demonstration and testing purposes.
+
+### Default Test Account
+```
+Email: admin@ikerfinance.com
+Password: Admin@123456
+```
+
+## What This Backend Does
 This is the "behind-the-scenes" part of IKER Finance that:
 
 - **Stores Your Data**: Keeps your transactions, budgets, and account information safely in a database
