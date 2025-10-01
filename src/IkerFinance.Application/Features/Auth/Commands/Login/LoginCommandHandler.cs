@@ -49,7 +49,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
                 user.Id,
                 user.Email!,
                 user.FirstName,
-                user.LastName
+                user.LastName,
+                user.HomeCurrencyId
             )
         );
     }

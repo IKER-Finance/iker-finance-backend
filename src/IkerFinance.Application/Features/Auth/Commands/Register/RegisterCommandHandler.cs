@@ -49,7 +49,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
                 user.Id,
                 user.Email!,
                 user.FirstName,
-                user.LastName
+                user.LastName,
+                user.HomeCurrencyId
             )
         );
     }

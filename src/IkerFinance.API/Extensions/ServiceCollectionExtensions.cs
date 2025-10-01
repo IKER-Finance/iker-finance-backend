@@ -11,6 +11,20 @@ public static class ServiceCollectionExtensions
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+                             ?? Array.Empty<string>();
+        
+        services.AddCors(options =>
+        {
+            options.AddPolicy("ApiCorsPolicy", policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                      .WithHeaders("Content-Type", "Authorization")
+                      .AllowCredentials();
+            });
+        });
 
         return services;
     }
