@@ -8,16 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.19" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IkerFinance.Application\IkerFinance.Application.csproj" />
     <ProjectReference Include="..\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj" />
+    <ProjectReference Include="..\IkerFinance.Shared\IkerFinance.Shared.csproj" />
+    <ProjectReference Include="..\IkerFinance.Domain\IkerFinance.Domain.csproj" />
   </ItemGroup>
 
 </Project>
