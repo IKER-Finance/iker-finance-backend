@@ -16,6 +16,8 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseCors("ApiCorsPolicy");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
