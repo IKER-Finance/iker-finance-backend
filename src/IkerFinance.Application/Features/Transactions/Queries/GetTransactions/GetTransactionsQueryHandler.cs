@@ -1,32 +1,66 @@
+using System.Linq.Expressions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
+using IkerFinance.Application.Common.Extensions;
+using IkerFinance.Domain.Entities;
+using IkerFinance.Domain.Enums;
+using IkerFinance.Shared.DTOs.Common;
 using IkerFinance.Shared.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactions;
 
-public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, List<TransactionDto>>
+public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PaginatedResponse<TransactionDto>>
 {
     private readonly IApplicationDbContext _context;
+
+    private readonly Dictionary<string, Expression<Func<Transaction, object>>> _sortExpressions = new()
+    {
+        { "Date", t => t.Date },
+        { "Amount", t => t.Amount },
+        { "Description", t => t.Description },
+        { "CreatedAt", t => t.CreatedAt }
+    };
 
     public GetTransactionsQueryHandler(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<List<TransactionDto>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedResponse<TransactionDto>> Handle(
+        GetTransactionsQuery request, 
+        CancellationToken cancellationToken)
     {
+        request.ValidatePagination();
+
         var query = _context.Transactions
             .Include(t => t.Currency)
             .Include(t => t.ConvertedCurrency)
             .Include(t => t.Category)
             .Where(t => t.UserId == request.UserId);
 
+        var searchTerm = request.GetNormalizedSearchTerm();
+        if (searchTerm != null)
+        {
+            query = query.Where(t =>
+                t.Description.ToLower().Contains(searchTerm) ||
+                (t.Notes != null && t.Notes.ToLower().Contains(searchTerm)));
+        }
+
+        if (request.Type.HasValue)
+            query = query.Where(t => t.Type == (TransactionType)request.Type.Value);
+
         if (request.StartDate.HasValue)
-            query = query.Where(t => t.Date >= request.StartDate.Value);
+        {
+            var startDateUtc = DateTime.SpecifyKind(request.StartDate.Value.Date, DateTimeKind.Utc);
+            query = query.Where(t => t.Date >= startDateUtc);
+        }
 
         if (request.EndDate.HasValue)
-            query = query.Where(t => t.Date <= request.EndDate.Value);
+        {
+            var endDateUtc = DateTime.SpecifyKind(request.EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+            query = query.Where(t => t.Date <= endDateUtc);
+        }
 
         if (request.CategoryId.HasValue)
             query = query.Where(t => t.CategoryId == request.CategoryId.Value);
@@ -34,29 +68,30 @@ public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery,
         if (request.CurrencyId.HasValue)
             query = query.Where(t => t.CurrencyId == request.CurrencyId.Value);
 
-        var transactions = await query
-            .OrderByDescending(t => t.Date)
-            .ThenByDescending(t => t.CreatedAt)
-            .ToListAsync(cancellationToken);
+        query = query.ApplySorting(request.SortBy, request.SortOrder, _sortExpressions);
 
-        return transactions.Select(t => new TransactionDto
-        {
-            Id = t.Id,
-            Amount = t.Amount,
-            CurrencyId = t.CurrencyId,
-            CurrencyCode = t.Currency.Code,
-            CurrencySymbol = t.Currency.Symbol,
-            ConvertedAmount = t.ConvertedAmount,
-            ConvertedCurrencyId = t.ConvertedCurrencyId,
-            ConvertedCurrencyCode = t.ConvertedCurrency.Code,
-            ExchangeRate = t.ExchangeRate,
-            Type = t.Type,
-            Description = t.Description,
-            Notes = t.Notes,
-            Date = t.Date,
-            CategoryId = t.CategoryId,
-            CategoryName = t.Category.Name,
-            CreatedAt = t.CreatedAt
-        }).ToList();
+        return await query.ToPaginatedListAsync(
+            request.PageNumber,
+            request.PageSize,
+            t => new TransactionDto
+            {
+                Id = t.Id,
+                Amount = t.Amount,
+                CurrencyId = t.CurrencyId,
+                CurrencyCode = t.Currency.Code,
+                CurrencySymbol = t.Currency.Symbol,
+                ConvertedAmount = t.ConvertedAmount,
+                ConvertedCurrencyId = t.ConvertedCurrencyId,
+                ConvertedCurrencyCode = t.ConvertedCurrency.Code,
+                ExchangeRate = t.ExchangeRate,
+                Type = t.Type,
+                Description = t.Description,
+                Notes = t.Notes,
+                Date = t.Date,
+                CategoryId = t.CategoryId,
+                CategoryName = t.Category.Name,
+                CreatedAt = t.CreatedAt
+            },
+            cancellationToken);
     }
 }

@@ -7,6 +7,7 @@ using IkerFinance.Application.Features.Transactions.Commands.UpdateTransaction;
 using IkerFinance.Application.Features.Transactions.Commands.DeleteTransaction;
 using IkerFinance.Application.Features.Transactions.Queries.GetTransactions;
 using IkerFinance.Application.Features.Transactions.Queries.GetTransactionById;
+using IkerFinance.Application.Features.Transactions.Queries.GetTransactionSummary;
 
 namespace IkerFinance.API.Controllers;
 
@@ -37,6 +38,16 @@ public class TransactionsController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetTransactions([FromQuery] GetTransactionsQuery query)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        query.UserId = userId!;
+        
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetTransactionSummary([FromQuery] GetTransactionSummaryQuery query)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         query.UserId = userId!;
