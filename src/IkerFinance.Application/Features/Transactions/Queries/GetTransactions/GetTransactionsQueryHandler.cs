@@ -51,10 +51,16 @@ public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery,
             query = query.Where(t => t.Type == (TransactionType)request.Type.Value);
 
         if (request.StartDate.HasValue)
-            query = query.Where(t => t.Date >= request.StartDate.Value);
+        {
+            var startDateUtc = DateTime.SpecifyKind(request.StartDate.Value.Date, DateTimeKind.Utc);
+            query = query.Where(t => t.Date >= startDateUtc);
+        }
 
         if (request.EndDate.HasValue)
-            query = query.Where(t => t.Date <= request.EndDate.Value);
+        {
+            var endDateUtc = DateTime.SpecifyKind(request.EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+            query = query.Where(t => t.Date <= endDateUtc);
+        }
 
         if (request.CategoryId.HasValue)
             query = query.Where(t => t.CategoryId == request.CategoryId.Value);
