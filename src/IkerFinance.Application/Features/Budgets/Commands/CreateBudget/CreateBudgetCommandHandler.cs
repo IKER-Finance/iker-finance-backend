@@ -42,10 +42,11 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
                 throw new ValidationException("Budget currency needs exchange rate to home currency");
         }
 
+        List<Category> categories = new();
         if (request.CategoryAllocations.Any())
         {
             var categoryIds = request.CategoryAllocations.Select(a => a.CategoryId).ToList();
-            var categories = await _context.Categories
+            categories = await _context.Categories
                 .Where(c => categoryIds.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
@@ -79,36 +80,30 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        var budgetWithCategories = await _context.Budgets
-            .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
-            .FirstAsync(b => b.Id == budget.Id, cancellationToken);
-
         return new BudgetDto
         {
-            Id = budgetWithCategories.Id,
-            Name = budgetWithCategories.Name,
-            Period = budgetWithCategories.Period,
-            StartDate = budgetWithCategories.StartDate,
-            EndDate = budgetWithCategories.EndDate,
-            Amount = budgetWithCategories.Amount,
-            CurrencyId = budgetWithCategories.CurrencyId,
+            Id = budget.Id,
+            Name = budget.Name,
+            Period = budget.Period,
+            StartDate = budget.StartDate,
+            EndDate = budget.EndDate,
+            Amount = budget.Amount,
+            CurrencyId = budget.CurrencyId,
             CurrencyCode = currency.Code,
             CurrencySymbol = currency.Symbol,
-            IsActive = budgetWithCategories.IsActive,
-            Description = budgetWithCategories.Description,
-            AllowOverlap = budgetWithCategories.AllowOverlap,
-            AlertAt80Percent = budgetWithCategories.AlertAt80Percent,
-            AlertAt100Percent = budgetWithCategories.AlertAt100Percent,
-            AlertsEnabled = budgetWithCategories.AlertsEnabled,
-            Categories = budgetWithCategories.Categories.Select(bc => new BudgetCategoryDto
+            IsActive = budget.IsActive,
+            Description = budget.Description,
+            AllowOverlap = budget.AllowOverlap,
+            AlertAt80Percent = budget.AlertAt80Percent,
+            AlertAt100Percent = budget.AlertAt100Percent,
+            AlertsEnabled = budget.AlertsEnabled,
+            Categories = request.CategoryAllocations.Select(a => new BudgetCategoryDto
             {
-                CategoryId = bc.CategoryId,
-                CategoryName = bc.Category.Name,
-                Amount = bc.Amount
+                CategoryId = a.CategoryId,
+                CategoryName = categories.First(c => c.Id == a.CategoryId).Name,
+                Amount = a.Amount
             }).ToList(),
-            CreatedAt = budgetWithCategories.CreatedAt
+            CreatedAt = budget.CreatedAt
         };
     }
 }
