@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using IkerFinance.Application.Common.Interfaces;
+using MediatR;
+using IkerFinance.Application.Features.Currencies.Queries.GetCurrencies;
 
 namespace IkerFinance.API.Controllers;
 
@@ -8,30 +8,20 @@ namespace IkerFinance.API.Controllers;
 [Route("api/[controller]")]
 public class CurrenciesController : ControllerBase
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMediator _mediator;
     private readonly ILogger<CurrenciesController> _logger;
 
-    public CurrenciesController(IApplicationDbContext context, ILogger<CurrenciesController> logger)
+    public CurrenciesController(IMediator mediator, ILogger<CurrenciesController> logger)
     {
-        _context = context;
+        _mediator = mediator;
         _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetActiveCurrencies()
     {
-        var currencies = await _context.Currencies
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.Code)
-            .Select(c => new 
-            {
-                c.Id,
-                c.Code,
-                c.Name,
-                c.Symbol
-            })
-            .ToListAsync();
-
-        return Ok(currencies);
+        var query = new GetCurrenciesQuery();
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 }
