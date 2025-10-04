@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
+using IkerFinance.Application.Common.Interfaces;
+using IkerFinance.Domain.Services;
 using IkerFinance.Shared.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.UpdateTransaction;
@@ -10,6 +11,7 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
+    private readonly TransactionService _transactionService;
 
     public UpdateTransactionCommandHandler(
         IApplicationDbContext context,
@@ -17,19 +19,25 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
     {
         _context = context;
         _conversionService = conversionService;
+        _transactionService = new TransactionService();
     }
 
-    public async Task<TransactionDto> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
+    public async Task<TransactionDto> Handle(
+        UpdateTransactionCommand request, 
+        CancellationToken cancellationToken)
     {
         var transaction = await _context.Transactions
+            .Include(t => t.User)
             .Include(t => t.Currency)
-            .Include(t => t.ConvertedCurrency)
             .Include(t => t.Category)
-            .Where(t => t.Id == request.Id && t.UserId == request.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == request.Id && t.UserId == request.UserId, cancellationToken);
 
         if (transaction == null)
             throw new NotFoundException("Transaction", request.Id);
+
+        var user = transaction.User;
+        if (!user.HomeCurrencyId.HasValue)
+            throw new ValidationException("User home currency not set");
 
         var category = await _context.Categories.FindAsync(new object[] { request.CategoryId }, cancellationToken);
         if (category == null)
@@ -39,40 +47,30 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
-        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
-        var homeCurrencyId = user!.HomeCurrencyId!.Value;
+        var homeCurrencyId = user.HomeCurrencyId.Value;
 
-        decimal convertedAmount;
-        decimal exchangeRate;
-
-        if (request.CurrencyId == homeCurrencyId)
-        {
-            convertedAmount = request.Amount;
-            exchangeRate = 1.0m;
-        }
-        else
+        Domain.Entities.ExchangeRate? exchangeRate = null;
+        if (request.CurrencyId != homeCurrencyId)
         {
             var rateExists = await _conversionService.RatesExistAsync(request.CurrencyId, homeCurrencyId);
             if (!rateExists)
                 throw new ValidationException("No exchange rate available for this currency");
 
-            var rate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
-            exchangeRate = rate.Rate;
-            convertedAmount = request.Amount * exchangeRate;
+            exchangeRate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
         }
 
-        transaction.Amount = request.Amount;
-        transaction.CurrencyId = request.CurrencyId;
-        transaction.ConvertedAmount = convertedAmount;
-        transaction.ConvertedCurrencyId = homeCurrencyId;
-        transaction.ExchangeRate = exchangeRate;
-        transaction.ExchangeRateDate = DateTime.UtcNow;
-        transaction.Type = category.Type;
-        transaction.Description = request.Description;
-        transaction.Notes = request.Notes;
-        transaction.Date = request.Date;
-        transaction.CategoryId = request.CategoryId;
-        transaction.UpdatedAt = DateTime.UtcNow;
+        _transactionService.Update(
+            transaction: transaction,
+            amount: request.Amount,
+            currencyId: request.CurrencyId,
+            homeCurrencyId: homeCurrencyId,
+            categoryId: request.CategoryId,
+            type: category.Type,
+            description: request.Description,
+            notes: request.Notes,
+            date: request.Date,
+            exchangeRate: exchangeRate
+        );
 
         await _context.SaveChangesAsync(cancellationToken);
 

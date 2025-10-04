@@ -1,8 +1,7 @@
 using MediatR;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Domain.Entities;
-using IkerFinance.Domain.Enums;
+using IkerFinance.Domain.Services;
 using IkerFinance.Shared.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;
@@ -11,6 +10,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
+    private readonly TransactionService _transactionService;
 
     public CreateTransactionCommandHandler(
         IApplicationDbContext context,
@@ -18,9 +18,12 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
     {
         _context = context;
         _conversionService = conversionService;
+        _transactionService = new TransactionService();
     }
 
-    public async Task<TransactionDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
+    public async Task<TransactionDto> Handle(
+        CreateTransactionCommand request, 
+        CancellationToken cancellationToken)
     {
         var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
@@ -36,40 +39,28 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 
         var homeCurrencyId = user.HomeCurrencyId.Value;
 
-        decimal convertedAmount;
-        decimal exchangeRate;
-
-        if (request.CurrencyId == homeCurrencyId)
-        {
-            convertedAmount = request.Amount;
-            exchangeRate = 1.0m;
-        }
-        else
+        Domain.Entities.ExchangeRate? exchangeRate = null;
+        if (request.CurrencyId != homeCurrencyId)
         {
             var rateExists = await _conversionService.RatesExistAsync(request.CurrencyId, homeCurrencyId);
             if (!rateExists)
                 throw new ValidationException("No exchange rate available for this currency");
 
-            var rate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
-            exchangeRate = rate.Rate;
-            convertedAmount = request.Amount * exchangeRate;
+            exchangeRate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
         }
 
-        var transaction = new Transaction
-        {
-            UserId = request.UserId,
-            Amount = request.Amount,
-            CurrencyId = request.CurrencyId,
-            ConvertedAmount = convertedAmount,
-            ConvertedCurrencyId = homeCurrencyId,
-            ExchangeRate = exchangeRate,
-            ExchangeRateDate = DateTime.UtcNow,
-            Type = category.Type,
-            Description = request.Description,
-            Notes = request.Notes,
-            Date = request.Date,
-            CategoryId = request.CategoryId
-        };
+        var transaction = _transactionService.Create(
+            userId: request.UserId,
+            amount: request.Amount,
+            currencyId: request.CurrencyId,
+            homeCurrencyId: homeCurrencyId,
+            categoryId: request.CategoryId,
+            type: category.Type,
+            description: request.Description,
+            notes: request.Notes,
+            date: request.Date,
+            exchangeRate: exchangeRate
+        );
 
         _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);

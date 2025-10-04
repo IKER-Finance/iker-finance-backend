@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Domain.Entities;
+using IkerFinance.Domain.Services;
 using IkerFinance.Shared.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Commands.CreateBudget;
@@ -11,6 +12,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
+    private readonly BudgetService _budgetService;
 
     public CreateBudgetCommandHandler(
         IApplicationDbContext context,
@@ -18,6 +20,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
     {
         _context = context;
         _conversionService = conversionService;
+        _budgetService = new BudgetService();
     }
 
     public async Task<BudgetDto> Handle(CreateBudgetCommand request, CancellationToken cancellationToken)
@@ -50,24 +53,15 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
                 throw new NotFoundException("One or more categories not found");
         }
 
-        var endDate = CalculateEndDate(request.StartDate, request.Period);
-
-        var budget = new Budget
-        {
-            UserId = request.UserId,
-            Name = request.Name,
-            CurrencyId = request.CurrencyId,
-            Amount = request.Amount,
-            Period = request.Period,
-            StartDate = request.StartDate,
-            EndDate = endDate,
-            Description = request.Description,
-            IsActive = true,
-            AllowOverlap = false,
-            AlertAt80Percent = 0.8m,
-            AlertAt100Percent = 1.0m,
-            AlertsEnabled = true
-        };
+        var budget = _budgetService.Create(
+            userId: request.UserId,
+            name: request.Name,
+            currencyId: request.CurrencyId,
+            amount: request.Amount,
+            period: request.Period,
+            startDate: request.StartDate,
+            description: request.Description
+        );
 
         _context.Budgets.Add(budget);
         await _context.SaveChangesAsync(cancellationToken);
@@ -115,19 +109,6 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
                 Amount = bc.Amount
             }).ToList(),
             CreatedAt = budgetWithCategories.CreatedAt
-        };
-    }
-
-    private DateTime CalculateEndDate(DateTime startDate, Domain.Enums.BudgetPeriod period)
-    {
-        return period switch
-        {
-            Domain.Enums.BudgetPeriod.Daily => startDate.AddDays(1),
-            Domain.Enums.BudgetPeriod.Weekly => startDate.AddDays(7),
-            Domain.Enums.BudgetPeriod.Monthly => startDate.AddMonths(1),
-            Domain.Enums.BudgetPeriod.Quarterly => startDate.AddMonths(3),
-            Domain.Enums.BudgetPeriod.Yearly => startDate.AddYears(1),
-            _ => throw new ValidationException("Invalid budget period")
         };
     }
 }
