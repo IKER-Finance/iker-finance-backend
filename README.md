@@ -1,519 +1,302 @@
 # IKER Finance - Backend API
-The server-side application that powers IKER Finance. This handles all the data storage, user accounts, security, and business logic for the personal finance management system.
 
-## Live Demo & Access
+Multi-currency personal finance management system built with Clean Architecture, CQRS, and MediatR patterns.
 
-### Hosted Environment
-- **Live API Documentation**: https://iker-finance.onrender.com/swagger
-- **API Base URL**: https://iker-finance.onrender.com/api/v1/
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)](https://www.postgresql.org/)
+[![EF Core](https://img.shields.io/badge/EF_Core-8.0-512BD4)](https://docs.microsoft.com/ef/)
+[![MediatR](https://img.shields.io/badge/MediatR-12.4-orange)](https://github.com/jbogard/MediatR)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+[![CQRS](https://img.shields.io/badge/Pattern-CQRS-brightgreen)](https://martinfowler.com/bliki/CQRS.html)
+[![JWT](https://img.shields.io/badge/Auth-JWT-black)](https://jwt.io/)
+[![xUnit](https://img.shields.io/badge/Tests-xUnit-red)](https://xunit.net/)
+[![Swagger](https://img.shields.io/badge/Docs-Swagger-85EA2D)](https://swagger.io/)
 
-**Note**: Deployed on Render's free tier for demonstration and testing purposes.
+## Live Demo
 
-### Default Test Account
+**API Documentation**: [https://iker-finance.onrender.com/swagger](https://iker-finance.onrender.com/swagger)
+
 ```
-Email: admin@ikerfinance.com
-Password: Admin@123456
+Test Credentials
+Email: test@ikerfinance.com
+Password: Test@123456
 ```
 
-## What This Backend Does
-This is the "behind-the-scenes" part of IKER Finance that:
+> Deployed on Render free tier - initial requests may take 30-60 seconds (cold start).
 
-- **Stores Your Data**: Keeps your transactions, budgets, and account information safely in a database
-- **Handles User Accounts**: Manages registration, login, and keeps your data secure
-- **Processes Requests**: When the frontend asks for data, this backend provides it
-- **Manages Security**: Ensures only you can access your financial information
-- **Currency Conversion**: Handles automatic currency conversion for your transactions
+## Overview
 
-**Think of it like this**: The frontend (what you see in your browser) is like a restaurant's dining room, and this backend is like the kitchen - it does all the work behind the scenes.
+IKER Finance provides a RESTful API for managing multi-currency personal finances, targeting immigrants, foreign students, expatriates, and international travelers.
 
-## Before You Start
+**Core Features**
 
-### What You Need Installed
+- **Multi-Currency Support** - Track transactions in any active currency with automatic conversion to your home currency
+- **Smart Budget Management** - Period-based budgets (daily/weekly/monthly/quarterly/yearly) with category-level tracking
+- **Customizable Categories** - Use default categories or create custom ones tailored to your spending patterns
+- **Historical Accuracy** - Exchange rates captured at transaction time, preserving accurate historical values
+- **Real-Time Dashboard** - Spending summaries and budget status calculated on-demand
+- **Data Export** - Export transaction history as CSV, PDF, or Excel files
+- **Secure Authentication** - JWT-based authentication with role-based access control
 
-1. **.NET 8 SDK** - This is Microsoft's platform for running the backend
-   - Download from: https://dotnet.microsoft.com/download/dotnet/8.0
-   - Choose "SDK" (not just Runtime)
-   - This includes everything needed to run .NET applications
+## Architecture
 
-2. **PostgreSQL 17 Database** - This stores all your financial data
-   - We'll help you install this in the setup steps below
-   - Don't worry if you've never used a database before!
+```
+API Layer
+  ├─ Controllers (HTTP endpoints, JWT extraction)
+  └─ Middleware (Global exception handling)
+         │
+Application Layer
+  ├─ Command/Query Handlers (Use case orchestration)
+  ├─ FluentValidation (Input validation)
+  └─ MediatR Pipeline (CQRS orchestration)
+         │
+Domain Layer
+  ├─ Entities (Rich domain models)
+  ├─ Domain Services (Complex business logic)
+  └─ Business Rules & Invariants
+         │
+Infrastructure Layer
+  ├─ EF Core + PostgreSQL (Data persistence)
+  └─ Services (External integrations)
+```
 
-3. **Git** - For downloading the code
-   - Download from: https://git-scm.com/
-   - Follow installation with default settings
+**Design Principles**
 
-4. **Code Editor** (optional but helpful)
-   - Visual Studio Code: https://code.visualstudio.com/
-   - Makes it easier to view configuration files
+- **Vertical Slice Architecture** - Features organized by business capability
+- **Clean Architecture** - Dependency inversion with separation of concerns
+- **CQRS Pattern** - Separate read and write operations
+- **Domain-Driven Design** - Rich domain models with encapsulated business logic
+- **Test-Driven Development** - Comprehensive test coverage with unit and integration tests
 
-### IMPORTANT: This Works With the Frontend
+## Quick Start
 
-**This backend must run together with the IKER Finance Frontend.** 
-- The backend runs on `http://localhost:5008` (or 5000)
-- The frontend connects to this backend to get and save data
-- You need both running at the same time for the app to work
+### Prerequisites
 
-## Step-by-Step Setup Guide
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [PostgreSQL 17](https://www.postgresql.org/download/)
 
-### Step 1: Download the Code
+### Installation
 
-Open your terminal or command prompt:
+1. Clone and restore dependencies
 
 ```bash
-# Download the project code
 git clone https://github.com/IKER-Finance/iker-finance-backend.git
-
-# Go into the project folder
 cd iker-finance-backend
-```
-
-**Don't have Git?** You can download the code as a ZIP file from GitHub and extract it.
-
-### Step 2: Check Your .NET Installation
-
-```bash
-# Verify .NET is installed correctly
-dotnet --version
-```
-
-You should see something like `8.0.x`. If you get an error, .NET isn't installed properly.
-
-### Step 3: Install Project Dependencies
-
-```bash
-# Download all the packages this project needs
 dotnet restore
-
-# Build the project to make sure everything works
-dotnet build
 ```
 
-**What's happening?** This downloads all the libraries and compiles the code to check for errors.
+2. Create PostgreSQL database
 
-### Step 4: Set Up the Database
-
-The application needs a database to store your financial data. We'll use PostgreSQL.
-
-#### For Mac Users
-
-**Easy Option - Using Postgres.app:**
-1. Go to https://postgresapp.com/
-2. **Important**: The main download might be PostgreSQL 18 - look for PostgreSQL 17 instead
-3. Download PostgreSQL 17 version of Postgres.app
-4. Install and open the app
-5. Click "Initialize" to create the default database server
-6. You'll see a green light - that means PostgreSQL 17 is running!
-
-**Alternative - Using Homebrew (if you have it):**
-```bash
-# Install PostgreSQL 17 specifically
-brew install postgresql@17
-brew services start postgresql@17
-```
-
-**Note**: If you can't find PostgreSQL 17 easily, search for "Postgres.app PostgreSQL 17" or "PostgreSQL 17 Mac download" in your browser.
-
-#### For Windows Users
-
-**Easy Option - PostgreSQL 17 Installer:**
-1. Go to https://www.postgresql.org/download/windows/
-2. Look for the "PostgreSQL 17" section (not the latest version 18)
-3. Click "Download" for PostgreSQL 17
-4. Run the downloaded installer
-5. Follow the setup wizard with default settings
-6. **Important**: Remember the password you create for the "postgres" user
-7. Keep the default port (5432)
-
-**Note**: If you can't find PostgreSQL 17 easily, you can also search for "PostgreSQL 17 windows installer download" in your browser.
-
-#### Create Your Database
-
-After PostgreSQL is installed and running, you'll need to create the database. We'll use pgAdmin4, which provides a visual interface (much easier than typing commands).
-
-#### Install pgAdmin4
-
-**For Both Mac and Windows:**
-1. Go to https://www.pgadmin.org/download/
-2. Download pgAdmin4 for your operating system
-3. Install it with the default settings
-
-#### Create the Database Using pgAdmin4
-
-1. **Open pgAdmin4** after installation
-2. **First time setup**: It will ask you to set a master password - remember this!
-3. **Connect to your PostgreSQL server**:
-   - Look for "PostgreSQL 17" in the left sidebar under "Servers"
-   - If you don't see it, right-click "Servers" → "Register" → "Server"
-   - **Connection tab**: 
-     - Host: `localhost`
-     - Port: `5432`
-     - Username: `postgres`
-     - Password: (the password you set when installing PostgreSQL)
-
-4. **Create the database**:
-   - Right-click on "Databases" in the left sidebar
-   - Select "Create" → "Database"
-   - **Database name**: `IkerFinanceDB` (exactly as written)
-   - Click "Save"
-
-5. **Verify it worked**:
-   - You should see "IkerFinanceDB" appear in the list under "Databases"
-   - Success! Your database is ready.
-
-**Alternative: Command Line Method (if pgAdmin doesn't work)**
-
-If pgAdmin4 isn't working for you, try these commands in terminal/command prompt:
-
-**For Mac (using Postgres.app):**
-```bash
-psql postgres
+```sql
 CREATE DATABASE "IkerFinanceDB";
-\q
 ```
 
-**For Windows:**
-```cmd
-psql -U postgres
-CREATE DATABASE "IkerFinanceDB";
-\q
-```
+3. Configure connection string
 
-### Step 5: Configure the Application
-
-The application needs to know how to connect to your database and other settings.
-
-Navigate to the API folder and create a configuration file:
-
-```bash
-# Go to the API project folder
-cd src/IkerFinance.API
-```
-
-Create a new file called `appsettings.Development.json` (use a text editor) with this content:
+Update `src/IkerFinance.API/appsettings.Development.json`:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=IkerFinanceDB;Username=postgres;Password=your_password_here;Port=5432"
+    "DefaultConnection": "Host=localhost;Database=IkerFinanceDB;Username=postgres;Password=your_password;Port=5432"
   },
   "JwtSettings": {
-    "SecretKey": "your-very-long-secret-key-for-security-at-least-64-characters-long-please",
+    "SecretKey": "your-secret-key-minimum-64-characters-required",
     "Issuer": "IkerFinance",
     "Audience": "IkerFinance-Users"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
   }
 }
 ```
 
-**Important Changes to Make:**
-1. **Replace `your_password_here`** with the PostgreSQL password you created
-2. **If you're on Mac using Postgres.app**, you might not have set a password, so just remove the `Password=your_password_here;` part
-3. The SecretKey can stay as-is for development
-
-### Step 6: Set Up Database Tables
-
-The application needs to create tables in your database to store data:
+4. Apply database migrations
 
 ```bash
-# Install the database tool (if not already installed)
-dotnet tool install --global dotnet-ef
-
-# Create the database structure
+cd src/IkerFinance.API
 dotnet ef database update --project ../IkerFinance.Infrastructure --startup-project .
 ```
 
-**What's happening?** This creates all the tables needed to store users, transactions, budgets, etc.
-
-### Step 7: Start the Backend
+5. Run the application
 
 ```bash
-# Start the backend server
 dotnet run
 ```
 
-You should see messages like:
-```
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: http://localhost:5008
-      Now listening on: https://localhost:5009
-info: Microsoft.Hosting.Lifetime[0]
-      Application started. Press Ctrl+C to shut down.
-```
+API available at: `http://localhost:5008` | Swagger UI: `http://localhost:5008/swagger`
 
-### Step 8: Verify It's Working
-
-1. Open your web browser
-2. Go to: `http://localhost:5008/swagger`
-3. You should see the API documentation page with a list of endpoints
-
-**Success!** Your backend is now running and ready to work with the frontend.
-
-## Testing the Backend
-
-### Default Admin Account
-
-The system automatically creates a test admin account:
-- **Email:** `admin@ikerfinance.com`
-- **Password:** `Admin@123456`
-
-You can use this to test login functionality.
-
-### Testing with the Frontend
-
-1. Make sure this backend is running (you should see the "listening on" messages)
-2. Start the frontend application
-3. Try logging in with the admin account above
-4. If login works, both frontend and backend are communicating correctly!
-
-## Common Commands
+## Testing
 
 ```bash
-# Start the backend (use this every time)
-dotnet run
-
-# Stop the backend
-# Press Ctrl+C in the terminal
-
-# Rebuild after making changes
-dotnet build
-
-# Create database tables (after database changes)
-dotnet ef database update --project src/IkerFinance.Infrastructure --startup-project src/IkerFinance.API
-
-# Run tests (to make sure everything works)
+# Run all tests
 dotnet test
+
+# Run specific test project
+dotnet test tests/IkerFinance.UnitTests
+dotnet test tests/IkerFinance.IntegrationTests
+dotnet test tests/IkerFinance.ArchitectureTests
 ```
 
-## Troubleshooting
-
-### Problem: "dotnet: command not found"
-**Solution:** .NET SDK isn't installed properly. Re-download and install from Microsoft's website.
-
-### Problem: Database connection errors
-**Solution:**
-1. **Check PostgreSQL is running:**
-   - Mac (Postgres.app): Look for the elephant icon in your menu bar
-   - Windows: Check Services or try connecting with `psql -U postgres`
-2. **Check your password** in `appsettings.Development.json`
-3. **Check the database exists:** Run `psql postgres` and then `\l` to list databases
-
-### Problem: "Port already in use" or similar
-**Solution:**
-1. Something else is using port 5008
-2. Kill the other process or use a different port
-3. Or restart your computer to clear all ports
-
-### Problem: Frontend can't connect to backend
-**Solution:**
-1. **Most common:** Make sure backend is actually running (check for "listening on" messages)
-2. **Check the port:** Frontend expects backend on `http://localhost:5008`
-3. **Check firewall:** Make sure your firewall isn't blocking the connection
-4. **Try the Swagger page:** Go to `http://localhost:5008/swagger` to verify backend is accessible
-
-### Problem: Database migration errors
-**Solution:**
-1. Make sure PostgreSQL is running
-2. Check your connection string in `appsettings.Development.json`
-3. Try dropping and recreating the database:
-   ```bash
-   # Connect to postgres
-   psql postgres
-   
-   # Drop and recreate database
-   DROP DATABASE IF EXISTS "IkerFinanceDB";
-   CREATE DATABASE "IkerFinanceDB";
-   \q
-   
-   # Run migration again
-   dotnet ef database update --project src/IkerFinance.Infrastructure --startup-project src/IkerFinance.API
-   ```
-
-### Problem: Build errors
-**Solution:**
-1. Make sure you're in the right directory (`iker-finance-backend`)
-2. Try cleaning and rebuilding:
-   ```bash
-   dotnet clean
-   dotnet restore
-   dotnet build
-   ```
-
-## How to Stop the Backend
-
-- Press `Ctrl+C` in the terminal where it's running
-- Close the terminal window
-- The backend will stop accepting connections
-
-## Understanding the Project Structure
-
-You don't need to understand this to use the app, but here's what the main folders do:
+## Project Structure
 
 ```
 src/
-├── IkerFinance.API/              # The web server that handles requests
-├── IkerFinance.Application/      # Business logic (what the app actually does)
-├── IkerFinance.Domain/           # Core business rules and data models
-├── IkerFinance.Infrastructure/   # Database connection and external services
-└── IkerFinance.Shared/           # Code shared between different parts
+├── IkerFinance.API/                       # Presentation layer
+│   ├── Controllers/                       # REST endpoints
+│   └── Middleware/                        # Global exception handling
+│
+├── IkerFinance.Application/               # Application layer (CQRS)
+│   ├── Common/
+│   │   ├── Behaviors/                     # MediatR pipeline
+│   │   ├── Exceptions/                    # Custom exceptions
+│   │   └── Interfaces/                    # Service contracts
+│   │
+│   └── Features/                          # Vertical slices
+│       └── {FeatureName}/
+│           ├── Commands/                  # Write operations
+│           │   └── {CommandName}/
+│           │       ├── {Command}.cs
+│           │       ├── {CommandHandler}.cs
+│           │       └── {CommandValidator}.cs
+│           └── Queries/                   # Read operations
+│               └── {QueryName}/
+│                   ├── {Query}.cs
+│                   └── {QueryHandler}.cs
+│
+├── IkerFinance.Domain/                    # Domain layer
+│   ├── Common/                            # Base entities
+│   ├── Entities/                          # Domain models
+│   ├── Enums/                             # Domain types
+│   └── Services/                          # Domain services (business logic)
+│
+├── IkerFinance.Infrastructure/            # Infrastructure layer
+│   ├── Data/                              # EF Core DbContext
+│   └── Services/                          # Service implementations
+│
+└── IkerFinance.Shared/                    # Shared contracts
+    └── DTOs/                              # Data transfer objects
 
 tests/
-└── Various test projects         # Code that tests if everything works correctly
+├── IkerFinance.UnitTests/                 # Unit tests
+├── IkerFinance.IntegrationTests/          # Integration tests
+└── IkerFinance.ArchitectureTests/         # Architecture validation
 ```
 
-## What Happens When You Run the Backend
+## API Documentation
 
-1. **Starts a web server** on your computer (port 5008)
-2. **Connects to PostgreSQL** database to store/retrieve data
-3. **Creates API endpoints** that the frontend can call
-4. **Handles authentication** (login/register requests)
-5. **Processes financial data** (transactions, budgets, reports)
-6. **Waits for requests** from the frontend application
+Complete API documentation available via **Swagger UI** at `/swagger` or visit the [live demo](https://iker-finance.onrender.com/swagger).
 
-## Security Notes
+### Authentication
 
-**For Development Only:**
-- The current setup is for development/testing on your local computer
-- Don't use this configuration for a real website
-- The admin password should be changed for any real use
-- Database passwords should be more secure for production
+Obtain JWT token:
 
-## Git Workflow and Branching Strategy
+```http
+POST /api/auth/login
+Content-Type: application/json
 
-If you're contributing to this project or working in a team, here's how we manage code changes using Git.
-
-### What is Git Branching? (Simple Explanation)
-
-Think of Git branches like different versions of the same project:
-- **main branch** = The final, working version (like a published book)
-- **develop branch** = The draft where we test new features (like a book being edited)
-- **feature branches** = Individual chapters being written (like writing one chapter at a time)
-
-### Our Branching Strategy
-
-```
-main (production-ready code)
-├── develop (development/testing)
-    ├── feature/your-feature-name
-    ├── feature/another-feature
-    └── bugfix/fix-something
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
 ```
 
-### Workflow Process
+Use token in subsequent requests:
 
-#### 1. Start New Work
-- Switch to the `develop` branch
-- Create a new branch from `develop` for your feature
-- Use clear naming: `feature/what-you-are-doing` or `bugfix/what-you-are-fixing`
+```http
+GET /api/transactions
+Authorization: Bearer {your-jwt-token}
+```
 
-**Good branch name examples:**
-- `feature/user-profile-page`
-- `feature/transaction-filtering`
-- `bugfix/login-error-handling`
-- `feature/currency-conversion`
+### Available Resources
 
-#### 2. Do Your Work
-- Make your changes to the code
-- Test that everything works
-- Make sure the backend still starts with `dotnet run`
+- **Authentication** - User registration and login
+- **Transactions** - Multi-currency transaction management
+- **Budgets** - Budget creation and tracking
+- **Categories** - Expense/income categorization
+- **Currencies** - Currency and exchange rate information
 
-#### 3. Save and Share Your Changes
-- Commit your changes with clear, descriptive messages
-- Push your branch to the remote repository
+Refer to Swagger documentation for detailed endpoint specifications and request/response schemas.
 
-**Good commit message examples:**
-- "Add budget management endpoints and validation"
-- "Fix login error when password contains special characters"
-- "Update user profile page with new fields"
+## Technology Stack
 
-#### 4. Create Pull Request
-- Create a pull request from your feature branch to `develop` (not `main`)
-- Write a clear title and description of what you changed
-- Wait for code review and approval
+**Framework & Language**
+- .NET 8.0 - Modern cross-platform framework
+- C# 12 - Latest language features
 
-#### 5. Clean Up
-- After your pull request is merged, delete your feature branch
-- Switch back to `develop` and pull the latest changes
+**Data & Persistence**
+- PostgreSQL 17 - Primary database
+- Entity Framework Core 8.0 - ORM with migrations
+- ASP.NET Core Identity - User management
 
-### Tools You Can Use
+**Patterns & Architecture**
+- MediatR 12.4.0 - CQRS implementation
+- FluentValidation 11.9.0 - Input validation
+- Clean Architecture - Layered separation of concerns
 
-You don't need to use command line Git. Many developers use visual Git tools:
+**Security & Authentication**
+- JWT Bearer Tokens - Stateless authentication
+- BCrypt - Password hashing
 
-- **Fork** (Mac/Windows) - Great visual interface
-- **GitHub Desktop** - Simple and free
-- **SourceTree** - Feature-rich and free
-- **GitKraken** - Beautiful interface with good features
-- **VS Code** - Has built-in Git features
-- **Command line** - If you prefer typing commands
+**Testing**
+- xUnit 2.5.3 - Test framework
+- FluentAssertions 6.12.0 - Fluent test assertions
+- Moq 4.20.70 - Mocking framework
+- EF Core InMemory - Test database provider
 
-All these tools can do the same workflow - use whatever you're comfortable with!
+## Contributing
 
-### Important Rules to Follow
+### Git Workflow
 
-1. **Never work directly on `main` or `develop` branches**
-2. **Always create a feature branch** for your work
-3. **Always start feature branches from `develop`** (not from `main`)
-4. **Write clear commit messages** that explain what you did
-5. **Test your code** before creating a pull request
-6. **Keep feature branches small** - one feature at a time
-7. **Create pull requests to `develop`** (not to `main`)
+1. Create feature branch from `develop`
 
-### Pull Request Guidelines
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/your-feature-name
+```
 
-When creating a pull request:
+2. Make changes and commit
 
-**Title**: Clear, concise description
-- Good: "Add transaction filtering by date range"
-- Bad: "Updates"
+```bash
+git add .
+git commit -m "feat: add transaction filtering by date range"
+```
 
-**Description**: Explain what and why
-- What changes did you make?
-- Why did you make these changes?
-- How should someone test your changes?
+3. Push and create Pull Request to `develop`
 
-### Why We Use This Workflow
+```bash
+git push origin feature/your-feature-name
+```
 
-This approach ensures:
-- **The main branch is always stable and working**
-- **Features are developed in isolation** and don't break other people's work
-- **Code is reviewed** before being added to the main project
-- **Everyone can work on different features** at the same time without conflicts
-- **We have a history** of all changes and can undo things if needed
+### Branch Naming
 
-### First Time Contributing?
+- `feature/description` - New features
+- `bugfix/description` - Bug fixes
+- `refactor/description` - Code refactoring
+- `docs/description` - Documentation updates
 
-If you're new to this workflow:
+### Commit Messages
 
-1. **Pick a small task first** (like fixing a typo or updating documentation)
-2. **Practice the workflow** with something simple
-3. **Ask questions** if you're unsure about anything
-4. **Don't worry about making mistakes** - that's how you learn!
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-The key is understanding the concept: develop → feature branch → pull request → merge back to develop.
+```
+feat(transactions): add CSV export functionality
+fix(budgets): correct period overlap validation
+docs(readme): update installation instructions
+```
 
-## Getting Help
+### Development Guidelines
 
-If you're stuck:
+1. Follow Clean Architecture principles
+2. Use CQRS pattern for new features
+3. Validate all inputs with FluentValidation
+4. Handle exceptions properly (use custom exception types)
+5. Return DTOs from handlers, not domain entities
+6. Filter by UserId for all user-scoped resources
+7. Write comprehensive tests after implementing features
 
-1. **Check the terminal output** for specific error messages
-2. **Make sure PostgreSQL is running** (most common issue)
-3. **Verify your configuration file** has the correct database password
-4. **Try the troubleshooting steps** above for your specific error
-5. **Test the Swagger page** at `http://localhost:5008/swagger`
-6. **For Git issues**: Ask a team member or search for the specific error message online
+## Related Repositories
 
-## Technologies Used
+**Frontend**: [iker-finance-frontend](https://github.com/IKER-Finance/iker-finance-frontend)
 
-You don't need to learn these to use the backend, but here's what powers it:
+---
 
-- **.NET 8** - Microsoft's platform for building web applications
-- **PostgreSQL** - A powerful, reliable database system
-- **Entity Framework** - Makes it easier to work with the database
-- **ASP.NET Identity** - Handles user accounts and security
-- **JWT Tokens** - Secure way to handle user sessions
-- **Clean Architecture** - Organized code structure for maintainability
+**Built with Clean Architecture | Powered by .NET 8 | Secured with JWT**
