@@ -46,12 +46,14 @@ API Layer
   └─ Middleware (Global exception handling)
          │
 Application Layer
-  ├─ Command/Query Handlers (Business logic)
+  ├─ Command/Query Handlers (Use case orchestration)
   ├─ FluentValidation (Input validation)
   └─ MediatR Pipeline (CQRS orchestration)
          │
 Domain Layer
-  └─ Entities (Rich domain models with business rules)
+  ├─ Entities (Rich domain models)
+  ├─ Domain Services (Complex business logic)
+  └─ Business Rules & Invariants
          │
 Infrastructure Layer
   ├─ EF Core + PostgreSQL (Data persistence)
@@ -160,8 +162,10 @@ src/
 │                   └── {QueryHandler}.cs
 │
 ├── IkerFinance.Domain/                    # Domain layer
+│   ├── Common/                            # Base entities
 │   ├── Entities/                          # Domain models
-│   └── Enums/                             # Domain types
+│   ├── Enums/                             # Domain types
+│   └── Services/                          # Domain services (business logic)
 │
 ├── IkerFinance.Infrastructure/            # Infrastructure layer
 │   ├── Data/                              # EF Core DbContext
