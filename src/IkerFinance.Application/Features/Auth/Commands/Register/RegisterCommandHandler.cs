@@ -27,6 +27,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
+            HomeCurrencyId = request.HomeCurrencyId,
             RegistrationDate = DateTime.UtcNow,
             IsActive = true
         };
