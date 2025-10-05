@@ -8,5 +8,6 @@ public record RegisterCommand(
     string Password,
     string ConfirmPassword,
     string FirstName,
-    string LastName
+    string LastName,
+    int HomeCurrencyId
 ) : IRequest<AuthResponse>;
