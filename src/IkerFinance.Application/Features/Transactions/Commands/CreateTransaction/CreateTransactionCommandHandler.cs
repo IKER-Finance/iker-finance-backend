@@ -3,6 +3,7 @@ using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Domain.Services;
 using IkerFinance.Shared.DTOs.Transactions;
+using Microsoft.EntityFrameworkCore;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;
 
@@ -25,7 +26,9 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         CreateTransactionCommand request, 
         CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
+        var user = await _context.Users
+            .Include(u => u.HomeCurrency)
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 

@@ -47,8 +47,7 @@ public static class DataSeeder
             new() { Name = "Food", Icon = "utensils", Color = "#FF6B6B", Type = TransactionType.Expense, IsSystem = true, SortOrder = 1 },
             new() { Name = "Transport", Icon = "car", Color = "#4ECDC4", Type = TransactionType.Expense, IsSystem = true, SortOrder = 2 },
             new() { Name = "Shopping", Icon = "shopping-bag", Color = "#45B7D1", Type = TransactionType.Expense, IsSystem = true, SortOrder = 3 },
-            new() { Name = "Bills", Icon = "file-text", Color = "#96CEB4", Type = TransactionType.Expense, IsSystem = true, SortOrder = 4 },
-            new() { Name = "Income", Icon = "trending-up", Color = "#00B894", Type = TransactionType.Income, IsSystem = true, SortOrder = 5 }
+            new() { Name = "Bills", Icon = "file-text", Color = "#96CEB4", Type = TransactionType.Expense, IsSystem = true, SortOrder = 4 }
         };
 
         context.Categories.AddRange(categories);
