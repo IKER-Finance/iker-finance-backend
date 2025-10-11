@@ -6,7 +6,7 @@ using IkerFinance.Application.Common.Interfaces;
 
 namespace IkerFinance.Application.Features.Auth.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
+public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;

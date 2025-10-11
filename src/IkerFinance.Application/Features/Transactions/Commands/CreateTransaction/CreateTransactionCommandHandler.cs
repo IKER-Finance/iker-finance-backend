@@ -3,22 +3,32 @@ using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Domain.DomainServices.Transaction;
 using IkerFinance.Application.DTOs.Transactions;
-using Microsoft.EntityFrameworkCore;
+using IkerFinance.Application.Common.Identity;
+using IkerFinance.Domain.Entities;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;
 
-public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>
+public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IReadRepository<ApplicationUser> _userRepository;
+    private readonly IReadRepository<Category> _categoryRepository;
+    private readonly IReadRepository<Currency> _currencyRepository;
     private readonly ICurrencyConversionService _conversionService;
     private readonly TransactionFactory _transactionFactory;
 
     public CreateTransactionCommandHandler(
         IApplicationDbContext context,
+        IReadRepository<ApplicationUser> userRepository,
+        IReadRepository<Category> categoryRepository,
+        IReadRepository<Currency> currencyRepository,
         ICurrencyConversionService conversionService,
         TransactionFactory transactionFactory)
     {
         _context = context;
+        _userRepository = userRepository;
+        _categoryRepository = categoryRepository;
+        _currencyRepository = currencyRepository;
         _conversionService = conversionService;
         _transactionFactory = transactionFactory;
     }
@@ -27,25 +37,21 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         CreateTransactionCommand request, 
         CancellationToken cancellationToken)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 
-        var category = await _context.Categories
-            .FirstOrDefaultAsync(c => c.Id == request.CategoryId, cancellationToken);
+        var category = await _categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
         if (category == null)
             throw new NotFoundException("Category", request.CategoryId);
 
-        var currency = await _context.Currencies
-            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
+        var currency = await _currencyRepository.GetByIdAsync(request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
         var homeCurrencyId = user.HomeCurrencyId.Value;
 
-        var homeCurrency = await _context.Currencies
-            .FirstOrDefaultAsync(c => c.Id == homeCurrencyId, cancellationToken);
+        var homeCurrency = await _currencyRepository.GetByIdAsync(homeCurrencyId, cancellationToken);
 
         Domain.Entities.ExchangeRate? exchangeRate = null;
         if (request.CurrencyId != homeCurrencyId)

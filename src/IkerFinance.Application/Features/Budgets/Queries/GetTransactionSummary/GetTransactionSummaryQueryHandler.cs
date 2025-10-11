@@ -1,65 +1,78 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Domain.Enums;
 using IkerFinance.Application.DTOs.Transactions;
+using IkerFinance.Domain.Entities;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactionSummary;
 
-public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionSummaryQuery, TransactionSummaryDto>
+public sealed class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionSummaryQuery, TransactionSummaryDto>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IReadRepository<ApplicationUser> _userRepository;
+    private readonly IReadRepository<Currency> _currencyRepository;
+    private readonly IReadRepository<Transaction> _transactionRepository;
+    private readonly IReadRepository<Category> _categoryRepository;
 
-    public GetTransactionSummaryQueryHandler(IApplicationDbContext context)
+    public GetTransactionSummaryQueryHandler(
+        IReadRepository<ApplicationUser> userRepository,
+        IReadRepository<Currency> currencyRepository,
+        IReadRepository<Transaction> transactionRepository,
+        IReadRepository<Category> categoryRepository)
     {
-        _context = context;
+        _userRepository = userRepository;
+        _currencyRepository = currencyRepository;
+        _transactionRepository = transactionRepository;
+        _categoryRepository = categoryRepository;
     }
 
     public async Task<TransactionSummaryDto> Handle(
-        GetTransactionSummaryQuery request, 
+        GetTransactionSummaryQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
 
         if (user?.HomeCurrencyId == null)
             throw new NotFoundException("User", request.UserId);
 
-        var homeCurrency = await _context.Currencies
-            .FirstOrDefaultAsync(c => c.Id == user.HomeCurrencyId, cancellationToken);
+        var homeCurrency = await _currencyRepository.GetByIdAsync(user.HomeCurrencyId.Value, cancellationToken);
 
-        var query = _context.Transactions
-            .Where(t => t.UserId == request.UserId);
+        var transactions = await _transactionRepository.FindAsync(
+            t => t.UserId == request.UserId,
+            cancellationToken);
+
+        var filteredTransactions = transactions.AsEnumerable();
 
         if (request.StartDate.HasValue)
         {
             var startDateUtc = DateTime.SpecifyKind(request.StartDate.Value.Date, DateTimeKind.Utc);
-            query = query.Where(t => t.Date >= startDateUtc);
+            filteredTransactions = filteredTransactions.Where(t => t.Date >= startDateUtc);
         }
 
         if (request.EndDate.HasValue)
         {
             var endDateUtc = DateTime.SpecifyKind(request.EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-            query = query.Where(t => t.Date <= endDateUtc);
+            filteredTransactions = filteredTransactions.Where(t => t.Date <= endDateUtc);
         }
 
-        var transactions = await query.ToListAsync(cancellationToken);
+        var transactionList = filteredTransactions.ToList();
 
-        var categoryIds = transactions.Select(t => t.CategoryId).Distinct().ToList();
-        var categories = await _context.Categories
-            .Where(c => categoryIds.Contains(c.Id))
-            .ToListAsync(cancellationToken);
+        var categoryIds = transactionList.Select(t => t.CategoryId).Distinct().ToList();
+        var categoriesResult = await _categoryRepository.FindAsync(
+            c => categoryIds.Contains(c.Id),
+            cancellationToken);
+        var categories = categoriesResult.ToList();
 
-        var totalIncome = transactions
+        var totalIncome = transactionList
             .Where(t => t.Type == TransactionType.Income)
             .Sum(t => t.ConvertedAmount);
 
-        var totalExpenses = transactions
+        var totalExpenses = transactionList
             .Where(t => t.Type == TransactionType.Expense)
             .Sum(t => t.ConvertedAmount);
 
-        var topIncomeCategories = transactions
+        var topIncomeCategories = transactionList
             .Where(t => t.Type == TransactionType.Income)
             .GroupBy(t => t.CategoryId)
             .Select(g =>
@@ -80,7 +93,7 @@ public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionS
             .Take(5)
             .ToList();
 
-        var topExpenseCategories = transactions
+        var topExpenseCategories = transactionList
             .Where(t => t.Type == TransactionType.Expense)
             .GroupBy(t => t.CategoryId)
             .Select(g =>
@@ -106,7 +119,7 @@ public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionS
             TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
             NetAmount = totalIncome - totalExpenses,
-            TotalTransactions = transactions.Count,
+            TotalTransactions = transactionList.Count,
             HomeCurrencyId = user.HomeCurrencyId.Value,
             HomeCurrencyCode = homeCurrency!.Code,
             HomeCurrencySymbol = homeCurrency.Symbol,

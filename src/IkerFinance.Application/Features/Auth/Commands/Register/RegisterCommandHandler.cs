@@ -6,7 +6,7 @@ using IkerFinance.Application.Common.Interfaces;
 
 namespace IkerFinance.Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
+public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;

@@ -1,25 +1,28 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.DTOs.Currencies;
+using IkerFinance.Domain.Entities;
 
 namespace IkerFinance.Application.Features.Currencies.Queries.GetCurrencies;
 
-public class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, List<CurrencyDto>>
+public sealed class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, List<CurrencyDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IReadRepository<Currency> _currencyRepository;
 
-    public GetCurrenciesQueryHandler(IApplicationDbContext context)
+    public GetCurrenciesQueryHandler(IReadRepository<Currency> currencyRepository)
     {
-        _context = context;
+        _currencyRepository = currencyRepository;
     }
 
     public async Task<List<CurrencyDto>> Handle(
-        GetCurrenciesQuery request, 
+        GetCurrenciesQuery request,
         CancellationToken cancellationToken)
     {
-        var currencies = await _context.Currencies
-            .Where(c => c.IsActive)
+        var currencies = await _currencyRepository.FindAsync(
+            c => c.IsActive,
+            cancellationToken);
+
+        return currencies
             .OrderBy(c => c.Code)
             .Select(c => new CurrencyDto
             {
@@ -28,8 +31,6 @@ public class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, Lis
                 Name = c.Name,
                 Symbol = c.Symbol
             })
-            .ToListAsync(cancellationToken);
-
-        return currencies;
+            .ToList();
     }
 }

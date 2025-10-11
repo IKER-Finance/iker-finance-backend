@@ -6,7 +6,7 @@ using IkerFinance.Domain.Enums;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactions;
 
-public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PaginatedResponse<TransactionDto>>
+public sealed class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PaginatedResponse<TransactionDto>>
 {
     private readonly ITransactionRepository _transactionRepository;
 

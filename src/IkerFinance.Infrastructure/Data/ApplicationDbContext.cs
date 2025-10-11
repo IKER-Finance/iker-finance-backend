@@ -13,7 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     {
     }
 
-    public IQueryable<ApplicationUser> Users => Set<ApplicationUser>();
+    public new IQueryable<ApplicationUser> Users => Set<ApplicationUser>();
     public IQueryable<Currency> Currencies => Set<Currency>();
     public IQueryable<ExchangeRate> ExchangeRates => Set<ExchangeRate>();
     public IQueryable<Category> Categories => Set<Category>();
@@ -23,9 +23,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public IQueryable<Feedback> Feedbacks => Set<Feedback>();
     public IQueryable<Export> Exports => Set<Export>();
 
-    public void Add<T>(T entity) where T : class => Set<T>().Add(entity);
-    public void Remove<T>(T entity) where T : class => Set<T>().Remove(entity);
-    public void Update<T>(T entity) where T : class => Set<T>().Update(entity);
+    public new void Add<T>(T entity) where T : class => Set<T>().Add(entity);
+    public new void Remove<T>(T entity) where T : class => Set<T>().Remove(entity);
+    public new void Update<T>(T entity) where T : class => Set<T>().Update(entity);
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
