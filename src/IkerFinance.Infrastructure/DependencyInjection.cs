@@ -7,6 +7,7 @@ using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Identity;
 using IkerFinance.Infrastructure.Services.Authentication;
 using IkerFinance.Infrastructure.Services;
+using IkerFinance.Infrastructure.Repositories;
 
 namespace IkerFinance.Infrastructure;
 
@@ -45,7 +46,11 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
-        
+
+        services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IBudgetRepository, BudgetRepository>();
+
         return services;
     }
 }
