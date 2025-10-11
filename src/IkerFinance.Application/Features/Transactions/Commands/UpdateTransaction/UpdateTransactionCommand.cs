@@ -1,5 +1,5 @@
 using MediatR;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.UpdateTransaction;
 

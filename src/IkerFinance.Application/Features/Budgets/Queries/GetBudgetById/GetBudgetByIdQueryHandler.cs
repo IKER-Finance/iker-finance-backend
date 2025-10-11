@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Queries.GetBudgetById;
 

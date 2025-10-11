@@ -1,4 +1,4 @@
-namespace IkerFinance.Shared.DTOs.Auth;
+namespace IkerFinance.Application.DTOs.Auth;
 
 public class LoginRequest
 {

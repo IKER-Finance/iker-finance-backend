@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using IkerFinance.Shared.DTOs.Common;
+using IkerFinance.Application.DTOs.Common;
 
 namespace IkerFinance.Application.Common.Extensions;
 

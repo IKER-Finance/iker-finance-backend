@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Domain.Enums;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Infrastructure.Data;
 
@@ -34,7 +35,10 @@ public static class DataSeeder
             new() { Code = "CNY", Name = "Chinese Yuan", Symbol = "¥", DecimalPlaces = 2 }
         };
 
-        context.Currencies.AddRange(currencies);
+        foreach (var currency in currencies)
+        {
+            context.Add(currency);
+        }
         await context.SaveChangesAsync();
     }
 
@@ -50,7 +54,10 @@ public static class DataSeeder
             new() { Name = "Bills", Icon = "file-text", Color = "#96CEB4", Type = TransactionType.Expense, IsSystem = true, SortOrder = 4 }
         };
 
-        context.Categories.AddRange(categories);
+        foreach (var category in categories)
+        {
+            context.Add(category);
+        }
         await context.SaveChangesAsync();
     }
 

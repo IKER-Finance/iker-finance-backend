@@ -1,5 +1,5 @@
 using MediatR;
-using IkerFinance.Shared.DTOs.Auth;
+using IkerFinance.Application.DTOs.Auth;
 
 namespace IkerFinance.Application.Features.Auth.Commands.Register;
 

@@ -1,4 +1,4 @@
-using IkerFinance.Domain.Entities;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Application.Common.Interfaces;
 

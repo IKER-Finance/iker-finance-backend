@@ -24,7 +24,7 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
         if (budget == null)
             throw new NotFoundException("Budget", request.Id);
 
-        _context.Budgets.Remove(budget);
+        _context.Remove(budget);
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

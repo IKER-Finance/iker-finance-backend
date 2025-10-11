@@ -1,4 +1,4 @@
-namespace IkerFinance.Shared.DTOs.Common;
+namespace IkerFinance.Application.DTOs.Common;
 
 public class PaginatedResponse<T>
 {

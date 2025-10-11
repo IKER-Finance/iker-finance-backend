@@ -1,4 +1,4 @@
-namespace IkerFinance.Shared.DTOs.Currencies;
+namespace IkerFinance.Application.DTOs.Currencies;
 
 public class CurrencyDto
 {

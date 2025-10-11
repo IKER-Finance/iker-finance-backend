@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactionById;
 

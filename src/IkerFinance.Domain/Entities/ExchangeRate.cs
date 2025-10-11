@@ -16,7 +16,6 @@ public class ExchangeRate : AuditableEntity
     
     public DateTime? LastUpdated { get; set; }
     public string? UpdatedByUserId { get; set; }
-    public virtual ApplicationUser? UpdatedByUser { get; set; }
 
     public bool IsCurrentlyValid()
     {

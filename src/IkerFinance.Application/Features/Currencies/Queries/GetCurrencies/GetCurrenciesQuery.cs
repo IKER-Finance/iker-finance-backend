@@ -1,5 +1,5 @@
 using MediatR;
-using IkerFinance.Shared.DTOs.Currencies;
+using IkerFinance.Application.DTOs.Currencies;
 
 namespace IkerFinance.Application.Features.Currencies.Queries.GetCurrencies;
 

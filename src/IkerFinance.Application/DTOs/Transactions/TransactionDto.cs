@@ -1,6 +1,6 @@
 using IkerFinance.Domain.Enums;
 
-namespace IkerFinance.Shared.DTOs.Transactions;
+namespace IkerFinance.Application.DTOs.Transactions;
 
 public class TransactionDto
 {

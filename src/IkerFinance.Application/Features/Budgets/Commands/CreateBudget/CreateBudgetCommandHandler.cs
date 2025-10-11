@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Domain.Entities;
-using IkerFinance.Domain.Services;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Domain.DomainServices.Budget;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Commands.CreateBudget;
 
@@ -12,24 +12,27 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly BudgetService _budgetService;
+    private readonly BudgetFactory _budgetFactory;
 
     public CreateBudgetCommandHandler(
         IApplicationDbContext context,
-        ICurrencyConversionService conversionService)
+        ICurrencyConversionService conversionService,
+        BudgetFactory budgetFactory)
     {
         _context = context;
         _conversionService = conversionService;
-        _budgetService = new BudgetService();
+        _budgetFactory = budgetFactory;
     }
 
     public async Task<BudgetDto> Handle(CreateBudgetCommand request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 
-        var currency = await _context.Currencies.FindAsync(new object[] { request.CurrencyId }, cancellationToken);
+        var currency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
@@ -54,7 +57,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
                 throw new NotFoundException("One or more categories not found");
         }
 
-        var budget = _budgetService.Create(
+        var budget = _budgetFactory.Create(
             userId: request.UserId,
             name: request.Name,
             currencyId: request.CurrencyId,
@@ -64,7 +67,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
             description: request.Description
         );
 
-        _context.Budgets.Add(budget);
+        _context.Add(budget);
         await _context.SaveChangesAsync(cancellationToken);
 
         foreach (var allocation in request.CategoryAllocations)
@@ -75,7 +78,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
                 CategoryId = allocation.CategoryId,
                 Amount = allocation.Amount
             };
-            _context.BudgetCategories.Add(budgetCategory);
+            _context.Add(budgetCategory);
         }
 
         await _context.SaveChangesAsync(cancellationToken);

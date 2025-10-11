@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Extensions;
 using IkerFinance.Domain.Entities;
-using IkerFinance.Shared.DTOs.Common;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Application.DTOs.Common;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Queries.GetBudgets;
 

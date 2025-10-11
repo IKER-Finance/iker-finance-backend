@@ -5,8 +5,8 @@ using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Extensions;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Shared.DTOs.Common;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Common;
+using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactions;
 

@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using IkerFinance.Infrastructure.Data;
-using IkerFinance.Domain.Entities;
 using IkerFinance.Application.Common.Interfaces;
+using IkerFinance.Application.Common.Identity;
 using IkerFinance.Infrastructure.Services.Authentication;
 using IkerFinance.Infrastructure.Services;
 

@@ -1,5 +1,5 @@
 using MediatR;
-using IkerFinance.Shared.DTOs.Categories;
+using IkerFinance.Application.DTOs.Categories;
 
 namespace IkerFinance.Application.Features.Categories.Queries.GetCategories;
 

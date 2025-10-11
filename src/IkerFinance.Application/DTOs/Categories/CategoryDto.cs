@@ -1,6 +1,6 @@
 using IkerFinance.Domain.Enums;
 
-namespace IkerFinance.Shared.DTOs.Categories;
+namespace IkerFinance.Application.DTOs.Categories;
 
 public class CategoryDto
 {

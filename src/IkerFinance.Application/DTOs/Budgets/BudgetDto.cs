@@ -1,6 +1,6 @@
 using IkerFinance.Domain.Enums;
 
-namespace IkerFinance.Shared.DTOs.Budgets;
+namespace IkerFinance.Application.DTOs.Budgets;
 
 public class BudgetDto
 {

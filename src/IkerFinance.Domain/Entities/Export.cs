@@ -6,7 +6,6 @@ namespace IkerFinance.Domain.Entities;
 public class Export : BaseEntity
 {
     public string UserId { get; set; } = string.Empty;
-    public virtual ApplicationUser User { get; set; } = null!;
     
     public ExportType Type { get; set; } = ExportType.CSV;
     public ExportContent Content { get; set; } = ExportContent.Transactions;

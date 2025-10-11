@@ -19,8 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\IkerFinance.Application\IkerFinance.Application.csproj" />
     <ProjectReference Include="..\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj" />
-    <ProjectReference Include="..\IkerFinance.Shared\IkerFinance.Shared.csproj" />
-    <ProjectReference Include="..\IkerFinance.Domain\IkerFinance.Domain.csproj" />
   </ItemGroup>
 
 </Project>

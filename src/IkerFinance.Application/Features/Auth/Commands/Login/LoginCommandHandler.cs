@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using IkerFinance.Domain.Entities;
-using IkerFinance.Shared.DTOs.Auth;
+using IkerFinance.Application.Common.Identity;
+using IkerFinance.Application.DTOs.Auth;
 using IkerFinance.Application.Common.Interfaces;
 
 namespace IkerFinance.Application.Features.Auth.Commands.Login;

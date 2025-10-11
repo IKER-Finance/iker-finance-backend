@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Shared.DTOs.Currencies;
+using IkerFinance.Application.DTOs.Currencies;
 
 namespace IkerFinance.Application.Features.Currencies.Queries.GetCurrencies;
 

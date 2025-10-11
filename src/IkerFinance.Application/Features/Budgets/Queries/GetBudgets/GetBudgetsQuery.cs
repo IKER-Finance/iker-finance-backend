@@ -1,7 +1,7 @@
 using IkerFinance.Application.Common.Queries;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Shared.DTOs.Common;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Application.DTOs.Common;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Queries.GetBudgets;
 

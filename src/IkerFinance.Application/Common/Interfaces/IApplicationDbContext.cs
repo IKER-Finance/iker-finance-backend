@@ -1,19 +1,23 @@
-using Microsoft.EntityFrameworkCore;
 using IkerFinance.Domain.Entities;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
-    DbSet<ApplicationUser> Users { get; }
-    DbSet<Currency> Currencies { get; }
-    DbSet<ExchangeRate> ExchangeRates { get; }
-    DbSet<Category> Categories { get; }
-    DbSet<Transaction> Transactions { get; }
-    DbSet<Budget> Budgets { get; }
-    DbSet<BudgetCategory> BudgetCategories { get; }
-    DbSet<Feedback> Feedbacks { get; }
-    DbSet<Export> Exports { get; }
-    
+    IQueryable<ApplicationUser> Users { get; }
+    IQueryable<Currency> Currencies { get; }
+    IQueryable<ExchangeRate> ExchangeRates { get; }
+    IQueryable<Category> Categories { get; }
+    IQueryable<Transaction> Transactions { get; }
+    IQueryable<Budget> Budgets { get; }
+    IQueryable<BudgetCategory> BudgetCategories { get; }
+    IQueryable<Feedback> Feedbacks { get; }
+    IQueryable<Export> Exports { get; }
+
+    void Add<T>(T entity) where T : class;
+    void Remove<T>(T entity) where T : class;
+    void Update<T>(T entity) where T : class;
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

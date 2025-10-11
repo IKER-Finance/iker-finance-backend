@@ -22,7 +22,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("IkerFinance.Domain.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("IkerFinance.Application.Common.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -113,10 +113,6 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultTransactionCurrencyId");
-
-                    b.HasIndex("HomeCurrencyId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -195,7 +191,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "StartDate", "EndDate");
 
-                    b.ToTable("Budgets");
+                    b.ToTable("Budgets", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.BudgetCategory", b =>
@@ -229,7 +225,7 @@ namespace IkerFinance.Infrastructure.Migrations
                     b.HasIndex("BudgetId", "CategoryId")
                         .IsUnique();
 
-                    b.ToTable("BudgetCategories");
+                    b.ToTable("BudgetCategories", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Category", b =>
@@ -284,7 +280,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "Name");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Currency", b =>
@@ -327,7 +323,7 @@ namespace IkerFinance.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Currencies");
+                    b.ToTable("Currencies", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.ExchangeRate", b =>
@@ -374,7 +370,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("FromCurrencyId", "ToCurrencyId", "EffectiveDate");
 
-                    b.ToTable("ExchangeRates");
+                    b.ToTable("ExchangeRates", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Export", b =>
@@ -432,7 +428,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Exports");
+                    b.ToTable("Exports", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Feedback", b =>
@@ -490,7 +486,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Transaction", b =>
@@ -564,7 +560,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "Date");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -699,23 +695,6 @@ namespace IkerFinance.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("IkerFinance.Domain.Entities.ApplicationUser", b =>
-                {
-                    b.HasOne("IkerFinance.Domain.Entities.Currency", "DefaultTransactionCurrency")
-                        .WithMany()
-                        .HasForeignKey("DefaultTransactionCurrencyId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("IkerFinance.Domain.Entities.Currency", "HomeCurrency")
-                        .WithMany()
-                        .HasForeignKey("HomeCurrencyId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("DefaultTransactionCurrency");
-
-                    b.Navigation("HomeCurrency");
-                });
-
             modelBuilder.Entity("IkerFinance.Domain.Entities.Budget", b =>
                 {
                     b.HasOne("IkerFinance.Domain.Entities.Currency", "Currency")
@@ -724,15 +703,13 @@ namespace IkerFinance.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("Budgets")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Currency");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.BudgetCategory", b =>
@@ -756,12 +733,10 @@ namespace IkerFinance.Infrastructure.Migrations
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Category", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("Categories")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.ExchangeRate", b =>
@@ -778,45 +753,37 @@ namespace IkerFinance.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "UpdatedByUser")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("FromCurrency");
 
                     b.Navigation("ToCurrency");
-
-                    b.Navigation("UpdatedByUser");
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Export", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "User")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Feedback", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "RespondedByUser")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("RespondedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("Feedbacks")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("RespondedByUser");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Transaction", b =>
@@ -839,10 +806,10 @@ namespace IkerFinance.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", "User")
-                        .WithMany("Transactions")
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -850,8 +817,6 @@ namespace IkerFinance.Infrastructure.Migrations
                     b.Navigation("ConvertedCurrency");
 
                     b.Navigation("Currency");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -865,7 +830,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", null)
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -874,7 +839,7 @@ namespace IkerFinance.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", null)
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -889,7 +854,7 @@ namespace IkerFinance.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", null)
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -898,22 +863,11 @@ namespace IkerFinance.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("IkerFinance.Domain.Entities.ApplicationUser", null)
+                    b.HasOne("IkerFinance.Application.Common.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("IkerFinance.Domain.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("Budgets");
-
-                    b.Navigation("Categories");
-
-                    b.Navigation("Feedbacks");
-
-                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("IkerFinance.Domain.Entities.Budget", b =>

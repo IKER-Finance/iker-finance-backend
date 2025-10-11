@@ -1,8 +1,8 @@
 using MediatR;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Domain.Services;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Domain.DomainServices.Transaction;
+using IkerFinance.Application.DTOs.Transactions;
 using Microsoft.EntityFrameworkCore;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;
@@ -11,15 +11,16 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly TransactionService _transactionService;
+    private readonly TransactionFactory _transactionFactory;
 
     public CreateTransactionCommandHandler(
         IApplicationDbContext context,
-        ICurrencyConversionService conversionService)
+        ICurrencyConversionService conversionService,
+        TransactionFactory transactionFactory)
     {
         _context = context;
         _conversionService = conversionService;
-        _transactionService = new TransactionService();
+        _transactionFactory = transactionFactory;
     }
 
     public async Task<TransactionDto> Handle(
@@ -27,20 +28,24 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         CancellationToken cancellationToken)
     {
         var user = await _context.Users
-            .Include(u => u.HomeCurrency)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 
-        var category = await _context.Categories.FindAsync(new object[] { request.CategoryId }, cancellationToken);
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == request.CategoryId, cancellationToken);
         if (category == null)
             throw new NotFoundException("Category", request.CategoryId);
 
-        var currency = await _context.Currencies.FindAsync(new object[] { request.CurrencyId }, cancellationToken);
+        var currency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
         var homeCurrencyId = user.HomeCurrencyId.Value;
+
+        var homeCurrency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == homeCurrencyId, cancellationToken);
 
         Domain.Entities.ExchangeRate? exchangeRate = null;
         if (request.CurrencyId != homeCurrencyId)
@@ -52,7 +57,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             exchangeRate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
         }
 
-        var transaction = _transactionService.Create(
+        var transaction = _transactionFactory.Create(
             userId: request.UserId,
             amount: request.Amount,
             currencyId: request.CurrencyId,
@@ -65,7 +70,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             exchangeRate: exchangeRate
         );
 
-        _context.Transactions.Add(transaction);
+        _context.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);
 
         return new TransactionDto
@@ -77,7 +82,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             CurrencySymbol = currency.Symbol,
             ConvertedAmount = transaction.ConvertedAmount,
             ConvertedCurrencyId = transaction.ConvertedCurrencyId,
-            ConvertedCurrencyCode = user.HomeCurrency!.Code,
+            ConvertedCurrencyCode = homeCurrency!.Code,
             ExchangeRate = transaction.ExchangeRate,
             Type = transaction.Type,
             Description = transaction.Description,

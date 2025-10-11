@@ -23,7 +23,7 @@ public class DeleteTransactionCommandHandler : IRequestHandler<DeleteTransaction
         if (transaction == null)
             throw new NotFoundException("Transaction", request.Id);
 
-        _context.Transactions.Remove(transaction);
+        _context.Remove(transaction);
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
