@@ -1,26 +1,23 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.DTOs.Categories;
-using IkerFinance.Domain.Entities;
 
 namespace IkerFinance.Application.Features.Categories.Queries.GetCategories;
 
 public sealed class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, List<CategoryDto>>
 {
-    private readonly IReadRepository<Category> _categoryRepository;
+    private readonly IApplicationDbContext _context;
 
-    public GetCategoriesQueryHandler(IReadRepository<Category> categoryRepository)
+    public GetCategoriesQueryHandler(IApplicationDbContext context)
     {
-        _categoryRepository = categoryRepository;
+        _context = context;
     }
 
     public async Task<List<CategoryDto>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = await _categoryRepository.FindAsync(
-            c => c.IsActive && (c.IsSystem || c.UserId == request.UserId),
-            cancellationToken);
-
-        return categories
+        var categories = await _context.Categories
+            .Where(c => c.IsActive && (c.IsSystem || c.UserId == request.UserId))
             .OrderBy(c => c.Type)
             .ThenBy(c => c.SortOrder)
             .ThenBy(c => c.Name)
@@ -35,6 +32,8 @@ public sealed class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQue
                 IsSystem = c.IsSystem,
                 IsActive = c.IsActive
             })
-            .ToList();
+            .ToListAsync(cancellationToken);
+
+        return categories;
     }
 }

@@ -1,10 +1,10 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Domain.DomainServices.Budget;
 using IkerFinance.Application.DTOs.Budgets;
-using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Application.Features.Budgets.Commands.CreateBudget;
 
@@ -13,33 +13,26 @@ public sealed class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCom
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
     private readonly BudgetService _budgetService;
-    private readonly IReadRepository<ApplicationUser> _userRepository;
-    private readonly IReadRepository<Currency> _currencyRepository;
-    private readonly IReadRepository<Category> _categoryRepository;
 
     public CreateBudgetCommandHandler(
         IApplicationDbContext context,
         ICurrencyConversionService conversionService,
-        BudgetService budgetService,
-        IReadRepository<ApplicationUser> userRepository,
-        IReadRepository<Currency> currencyRepository,
-        IReadRepository<Category> categoryRepository)
+        BudgetService budgetService)
     {
         _context = context;
         _conversionService = conversionService;
         _budgetService = budgetService;
-        _userRepository = userRepository;
-        _currencyRepository = currencyRepository;
-        _categoryRepository = categoryRepository;
     }
 
     public async Task<BudgetDto> Handle(CreateBudgetCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 
-        var currency = await _currencyRepository.GetByIdAsync(request.CurrencyId, cancellationToken);
+        var currency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
@@ -56,10 +49,10 @@ public sealed class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCom
         if (request.CategoryAllocations.Any())
         {
             var categoryIds = request.CategoryAllocations.Select(a => a.CategoryId).ToList();
-            var categoriesResult = await _categoryRepository.FindAsync(
-                c => categoryIds.Contains(c.Id),
-                cancellationToken);
-            categories = categoriesResult.ToList();
+            var categoriesResult = await _context.Categories
+                .Where(c => categoryIds.Contains(c.Id))
+                .ToListAsync(cancellationToken);
+            categories = categoriesResult;
 
             if (categories.Count != categoryIds.Count)
                 throw new NotFoundException("One or more categories not found");

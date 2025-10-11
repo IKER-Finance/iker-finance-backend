@@ -46,8 +46,6 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
-
-        services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
 

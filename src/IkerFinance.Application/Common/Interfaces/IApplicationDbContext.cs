@@ -12,8 +12,6 @@ public interface IApplicationDbContext
     IQueryable<Transaction> Transactions { get; }
     IQueryable<Budget> Budgets { get; }
     IQueryable<BudgetCategory> BudgetCategories { get; }
-    IQueryable<Feedback> Feedbacks { get; }
-    IQueryable<Export> Exports { get; }
 
     void Add<T>(T entity) where T : class;
     void Remove<T>(T entity) where T : class;
