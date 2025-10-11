@@ -7,13 +7,11 @@ namespace IkerFinance.UnitTests.Domain.Services;
 
 public class BudgetServiceTests
 {
-    private readonly BudgetFactory _budgetFactory;
-    private readonly BudgetUpdater _budgetUpdater;
+    private readonly BudgetService _budgetService;
 
     public BudgetServiceTests()
     {
-        _budgetFactory = new BudgetFactory();
-        _budgetUpdater = new BudgetUpdater(_budgetFactory);
+        _budgetService = new BudgetService();
     }
 
     // Test: Daily budget period adds 1 day to start date
@@ -22,7 +20,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Daily Budget",
             currencyId: 1,
@@ -42,7 +40,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Weekly Budget",
             currencyId: 1,
@@ -62,7 +60,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 15);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Monthly Budget",
             currencyId: 1,
@@ -82,7 +80,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Quarterly Budget",
             currencyId: 1,
@@ -102,7 +100,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 3, 15);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Yearly Budget",
             currencyId: 1,
@@ -120,7 +118,7 @@ public class BudgetServiceTests
     [Fact]
     public void Create_SetsDefaultProperties()
     {
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Test Budget",
             currencyId: 2,
@@ -159,7 +157,7 @@ public class BudgetServiceTests
             IsActive = true
         };
 
-        _budgetUpdater.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Updated Budget",
             currencyId: 2,
@@ -195,7 +193,7 @@ public class BudgetServiceTests
             EndDate = new DateTime(2025, 2, 1)
         };
 
-        _budgetUpdater.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Budget",
             currencyId: 1,
@@ -228,7 +226,7 @@ public class BudgetServiceTests
 
         var beforeUpdate = DateTime.UtcNow;
 
-        _budgetUpdater.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Updated",
             currencyId: 1,
@@ -248,7 +246,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2024, 1, 31);
 
-        var result = _budgetFactory.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Leap Year Test",
             currencyId: 1,

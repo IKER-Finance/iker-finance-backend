@@ -12,7 +12,7 @@ public sealed class UpdateTransactionCommandHandler : IRequestHandler<UpdateTran
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly TransactionUpdater _transactionUpdater;
+    private readonly TransactionService _transactionService;
     private readonly IReadRepository<Transaction> _transactionRepository;
     private readonly IReadRepository<ApplicationUser> _userRepository;
     private readonly IReadRepository<Category> _categoryRepository;
@@ -21,7 +21,7 @@ public sealed class UpdateTransactionCommandHandler : IRequestHandler<UpdateTran
     public UpdateTransactionCommandHandler(
         IApplicationDbContext context,
         ICurrencyConversionService conversionService,
-        TransactionUpdater transactionUpdater,
+        TransactionService transactionService,
         IReadRepository<Transaction> transactionRepository,
         IReadRepository<ApplicationUser> userRepository,
         IReadRepository<Category> categoryRepository,
@@ -29,7 +29,7 @@ public sealed class UpdateTransactionCommandHandler : IRequestHandler<UpdateTran
     {
         _context = context;
         _conversionService = conversionService;
-        _transactionUpdater = transactionUpdater;
+        _transactionService = transactionService;
         _transactionRepository = transactionRepository;
         _userRepository = userRepository;
         _categoryRepository = categoryRepository;
@@ -73,7 +73,7 @@ public sealed class UpdateTransactionCommandHandler : IRequestHandler<UpdateTran
             exchangeRate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
         }
 
-        _transactionUpdater.Update(
+        _transactionService.Update(
             transaction: transaction,
             amount: request.Amount,
             currencyId: request.CurrencyId,

@@ -12,7 +12,7 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly BudgetUpdater _budgetUpdater;
+    private readonly BudgetService _budgetService;
     private readonly IReadRepository<Budget> _budgetRepository;
     private readonly IReadRepository<Currency> _currencyRepository;
     private readonly IReadRepository<ApplicationUser> _userRepository;
@@ -21,7 +21,7 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
     public UpdateBudgetCommandHandler(
         IApplicationDbContext context,
         ICurrencyConversionService conversionService,
-        BudgetUpdater budgetUpdater,
+        BudgetService budgetService,
         IReadRepository<Budget> budgetRepository,
         IReadRepository<Currency> currencyRepository,
         IReadRepository<ApplicationUser> userRepository,
@@ -29,7 +29,7 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
     {
         _context = context;
         _conversionService = conversionService;
-        _budgetUpdater = budgetUpdater;
+        _budgetService = budgetService;
         _budgetRepository = budgetRepository;
         _currencyRepository = currencyRepository;
         _userRepository = userRepository;
@@ -72,7 +72,7 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
                 throw new NotFoundException("One or more categories not found");
         }
 
-        _budgetUpdater.Update(
+        _budgetService.Update(
             budget: budget,
             name: request.Name,
             currencyId: request.CurrencyId,

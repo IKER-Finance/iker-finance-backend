@@ -15,7 +15,7 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
     private readonly IReadRepository<Category> _categoryRepository;
     private readonly IReadRepository<Currency> _currencyRepository;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly TransactionFactory _transactionFactory;
+    private readonly TransactionService _transactionService;
 
     public CreateTransactionCommandHandler(
         IApplicationDbContext context,
@@ -23,14 +23,14 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
         IReadRepository<Category> categoryRepository,
         IReadRepository<Currency> currencyRepository,
         ICurrencyConversionService conversionService,
-        TransactionFactory transactionFactory)
+        TransactionService transactionService)
     {
         _context = context;
         _userRepository = userRepository;
         _categoryRepository = categoryRepository;
         _currencyRepository = currencyRepository;
         _conversionService = conversionService;
-        _transactionFactory = transactionFactory;
+        _transactionService = transactionService;
     }
 
     public async Task<TransactionDto> Handle(
@@ -63,7 +63,7 @@ public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTran
             exchangeRate = await _conversionService.GetExchangeRateAsync(request.CurrencyId, homeCurrencyId);
         }
 
-        var transaction = _transactionFactory.Create(
+        var transaction = _transactionService.Create(
             userId: request.UserId,
             amount: request.Amount,
             currencyId: request.CurrencyId,

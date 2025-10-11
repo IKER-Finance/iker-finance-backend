@@ -12,7 +12,7 @@ public sealed class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCom
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
-    private readonly BudgetFactory _budgetFactory;
+    private readonly BudgetService _budgetService;
     private readonly IReadRepository<ApplicationUser> _userRepository;
     private readonly IReadRepository<Currency> _currencyRepository;
     private readonly IReadRepository<Category> _categoryRepository;
@@ -20,14 +20,14 @@ public sealed class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCom
     public CreateBudgetCommandHandler(
         IApplicationDbContext context,
         ICurrencyConversionService conversionService,
-        BudgetFactory budgetFactory,
+        BudgetService budgetService,
         IReadRepository<ApplicationUser> userRepository,
         IReadRepository<Currency> currencyRepository,
         IReadRepository<Category> categoryRepository)
     {
         _context = context;
         _conversionService = conversionService;
-        _budgetFactory = budgetFactory;
+        _budgetService = budgetService;
         _userRepository = userRepository;
         _currencyRepository = currencyRepository;
         _categoryRepository = categoryRepository;
@@ -65,7 +65,7 @@ public sealed class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCom
                 throw new NotFoundException("One or more categories not found");
         }
 
-        var budget = _budgetFactory.Create(
+        var budget = _budgetService.Create(
             userId: request.UserId,
             name: request.Name,
             currencyId: request.CurrencyId,

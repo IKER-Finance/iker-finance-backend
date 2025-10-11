@@ -16,13 +16,11 @@ public static class DependencyInjection
     public static IServiceCollection AddDomain(this IServiceCollection services)
     {
         // Budget domain services
-        services.AddTransient<BudgetFactory>();
-        services.AddTransient<BudgetUpdater>();
+        services.AddTransient<BudgetService>();
         services.AddTransient<BudgetCalculator>();
 
         // Transaction domain services
-        services.AddTransient<TransactionFactory>();
-        services.AddTransient<TransactionUpdater>();
+        services.AddTransient<TransactionService>();
 
         return services;
     }
