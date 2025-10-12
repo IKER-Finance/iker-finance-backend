@@ -21,15 +21,14 @@ public class BudgetRepository : IBudgetRepository
     {
         var query = _context.Budgets
             .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
+            .Include(b => b.Category)
             .Where(b => b.UserId == filters.UserId);
 
         if (!string.IsNullOrWhiteSpace(filters.SearchTerm))
         {
             var searchTerm = filters.SearchTerm.ToLower();
             query = query.Where(b =>
-                b.Name.ToLower().Contains(searchTerm) ||
+                b.Category.Name.ToLower().Contains(searchTerm) ||
                 (b.Description != null && b.Description.ToLower().Contains(searchTerm)));
         }
 
@@ -57,7 +56,10 @@ public class BudgetRepository : IBudgetRepository
             .Select(b => new BudgetDto
             {
                 Id = b.Id,
-                Name = b.Name,
+                CategoryId = b.CategoryId,
+                CategoryName = b.Category.Name,
+                CategoryIcon = b.Category.Icon,
+                CategoryColor = b.Category.Color,
                 Period = b.Period,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
@@ -71,12 +73,6 @@ public class BudgetRepository : IBudgetRepository
                 AlertAt80Percent = b.AlertAt80Percent,
                 AlertAt100Percent = b.AlertAt100Percent,
                 AlertsEnabled = b.AlertsEnabled,
-                Categories = b.Categories.Select(bc => new BudgetCategoryDto
-                {
-                    CategoryId = bc.CategoryId,
-                    CategoryName = bc.Category.Name,
-                    Amount = bc.Amount
-                }).ToList(),
                 CreatedAt = b.CreatedAt
             })
             .ToListAsync(cancellationToken);
@@ -97,13 +93,15 @@ public class BudgetRepository : IBudgetRepository
     {
         return await _context.Budgets
             .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
+            .Include(b => b.Category)
             .Where(b => b.Id == id && b.UserId == userId)
             .Select(b => new BudgetDto
             {
                 Id = b.Id,
-                Name = b.Name,
+                CategoryId = b.CategoryId,
+                CategoryName = b.Category.Name,
+                CategoryIcon = b.Category.Icon,
+                CategoryColor = b.Category.Color,
                 Period = b.Period,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
@@ -117,12 +115,6 @@ public class BudgetRepository : IBudgetRepository
                 AlertAt80Percent = b.AlertAt80Percent,
                 AlertAt100Percent = b.AlertAt100Percent,
                 AlertsEnabled = b.AlertsEnabled,
-                Categories = b.Categories.Select(bc => new BudgetCategoryDto
-                {
-                    CategoryId = bc.CategoryId,
-                    CategoryName = bc.Category.Name,
-                    Amount = bc.Amount
-                }).ToList(),
                 CreatedAt = b.CreatedAt
             })
             .FirstOrDefaultAsync(cancellationToken);

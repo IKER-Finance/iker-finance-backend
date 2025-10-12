@@ -28,12 +28,12 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
         if (user?.HomeCurrencyId == null)
             throw new BadRequestException("User home currency not configured");
 
-        // Find budgets that cover this transaction date
+        // Find budgets that cover this transaction date and category
         var affectingBudgets = await _context.Budgets
             .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
+            .Include(b => b.Category)
             .Where(b => b.UserId == request.UserId
+                && b.CategoryId == request.CategoryId
                 && b.StartDate <= request.TransactionDate
                 && b.EndDate >= request.TransactionDate)
             .ToListAsync(cancellationToken);
@@ -62,10 +62,11 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
         // Calculate impact on each budget
         foreach (var budget in affectingBudgets)
         {
-            // Get existing transactions in budget period
+            // Get existing transactions for this category in budget period
             var transactions = await _context.Transactions
                 .Where(t => t.UserId == request.UserId
                     && t.Type == TransactionType.Expense
+                    && t.CategoryId == budget.CategoryId
                     && t.Date >= budget.StartDate
                     && t.Date <= budget.EndDate)
                 .ToListAsync(cancellationToken);
@@ -105,21 +106,24 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
             if (statusBefore != "OverBudget" && statusAfter == "OverBudget")
             {
                 willTriggerAlert = true;
-                alertMessage = $"This transaction will cause '{budget.Name}' to exceed its budget!";
+                alertMessage = $"This transaction will cause the '{budget.Category.Name}' budget to exceed its limit!";
                 warnings.Add(alertMessage);
                 hasWarnings = true;
             }
             else if (statusBefore == "OnTrack" && statusAfter == "Warning")
             {
                 willTriggerAlert = true;
-                alertMessage = $"This transaction will push '{budget.Name}' over 80% spent.";
+                alertMessage = $"This transaction will push the '{budget.Category.Name}' budget over 80% spent.";
             }
 
             // Build affected budget DTO
             var affectedBudget = new AffectedBudgetDto
             {
                 BudgetId = budget.Id,
-                BudgetName = budget.Name,
+                CategoryId = budget.CategoryId,
+                CategoryName = budget.Category.Name,
+                CategoryIcon = budget.Category.Icon,
+                CategoryColor = budget.Category.Color,
                 CurrentSpent = Math.Round(currentSpent, 2),
                 CurrentRemaining = Math.Round(currentRemaining, 2),
                 CurrentPercentage = Math.Round(currentPercentage, 2),
@@ -133,46 +137,6 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
                 CurrencyCode = budget.Currency.Code,
                 CurrencySymbol = budget.Currency.Symbol
             };
-
-            // Check category-level impact
-            var budgetCategory = budget.Categories.FirstOrDefault(bc => bc.CategoryId == request.CategoryId);
-            if (budgetCategory != null)
-            {
-                // Calculate category spent
-                decimal categoryCurrentSpent = 0;
-                var categoryTransactions = transactions.Where(t => t.CategoryId == request.CategoryId);
-
-                foreach (var transaction in categoryTransactions)
-                {
-                    var amountInBudgetCurrency = await _conversionService.ConvertAsync(
-                        transaction.ConvertedAmount,
-                        transaction.ConvertedCurrencyId,
-                        budget.CurrencyId);
-
-                    categoryCurrentSpent += amountInBudgetCurrency;
-                }
-
-                decimal categoryAfterSpent = categoryCurrentSpent + newTransactionInBudgetCurrency;
-                bool willExceed = categoryAfterSpent > budgetCategory.Amount;
-                decimal exceedAmount = willExceed ? categoryAfterSpent - budgetCategory.Amount : 0;
-
-                if (willExceed)
-                {
-                    warnings.Add($"This transaction will exceed the '{budgetCategory.Category.Name}' category allocation by {exceedAmount:F2} {budget.Currency.Symbol}");
-                    hasWarnings = true;
-                }
-
-                affectedBudget.AffectedCategory = new AffectedCategoryDto
-                {
-                    CategoryId = budgetCategory.CategoryId,
-                    CategoryName = budgetCategory.Category.Name,
-                    Allocated = budgetCategory.Amount,
-                    CurrentSpent = Math.Round(categoryCurrentSpent, 2),
-                    AfterSpent = Math.Round(categoryAfterSpent, 2),
-                    WillExceed = willExceed,
-                    ExceedAmount = Math.Round(exceedAmount, 2)
-                };
-            }
 
             affectedBudgets.Add(affectedBudget);
         }

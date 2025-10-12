@@ -19,7 +19,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public IQueryable<Category> Categories => Set<Category>();
     public IQueryable<Transaction> Transactions => Set<Transaction>();
     public IQueryable<Budget> Budgets => Set<Budget>();
-    public IQueryable<BudgetCategory> BudgetCategories => Set<BudgetCategory>();
 
     public new void Add<T>(T entity) where T : class => Set<T>().Add(entity);
     public new void Remove<T>(T entity) where T : class => Set<T>().Remove(entity);
@@ -131,7 +130,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
         {
             entity.ToTable("Budgets");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.AlertAt80Percent).HasPrecision(5, 2);
@@ -148,27 +146,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
                 .HasForeignKey(e => e.CurrencyId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => new { e.UserId, e.StartDate, e.EndDate });
-        });
-
-        builder.Entity<BudgetCategory>(entity =>
-        {
-            entity.ToTable("BudgetCategories");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Amount).HasPrecision(18, 2).IsRequired();
-
-            entity.HasOne(e => e.Budget)
-                .WithMany(b => b.Categories)
-                .HasForeignKey(e => e.BudgetId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Category)
-                .WithMany(c => c.BudgetCategories)
-                .HasForeignKey(e => e.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasIndex(e => new { e.BudgetId, e.CategoryId }).IsUnique();
+            entity.HasIndex(e => new { e.UserId, e.CategoryId, e.Period, e.IsActive })
+                .HasFilter("\"IsActive\" = true");
         });
     }
 }

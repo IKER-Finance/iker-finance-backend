@@ -38,8 +38,7 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
         var currentDate = DateTime.UtcNow;
         var activeBudgets = await _context.Budgets
             .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
+            .Include(b => b.Category)
             .Where(b => b.UserId == request.UserId
                 && b.IsActive
                 && b.StartDate <= currentDate
@@ -58,12 +57,12 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
         // Process each budget
         foreach (var budget in activeBudgets)
         {
-            // Get transactions for this budget period
+            // Get transactions for this budget category in budget period
             var transactions = await _context.Transactions
                 .Include(t => t.ConvertedCurrency)
-                .Include(t => t.Category)
                 .Where(t => t.UserId == request.UserId
                     && t.Type == TransactionType.Expense
+                    && t.CategoryId == budget.CategoryId
                     && t.Date >= budget.StartDate
                     && t.Date <= budget.EndDate)
                 .ToListAsync(cancellationToken);
@@ -107,7 +106,10 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
             var budgetItem = new ActiveBudgetItemDto
             {
                 Id = budget.Id,
-                Name = budget.Name,
+                CategoryId = budget.CategoryId,
+                CategoryName = budget.Category.Name,
+                CategoryIcon = budget.Category.Icon,
+                CategoryColor = budget.Category.Color,
                 Amount = budget.Amount,
                 SpentAmount = Math.Round(spentInBudgetCurrency, 2),
                 RemainingAmount = Math.Round(remaining, 2),
@@ -118,43 +120,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
                 StartDate = budget.StartDate,
                 EndDate = budget.EndDate
             };
-
-            // Include category breakdown if requested
-            if (request.IncludeCategories && budget.Categories.Any())
-            {
-                budgetItem.Categories = new List<ActiveBudgetCategoryDto>();
-
-                foreach (var budgetCategory in budget.Categories)
-                {
-                    decimal categorySpent = 0;
-                    var categoryTransactions = transactions.Where(t => t.CategoryId == budgetCategory.CategoryId);
-
-                    foreach (var transaction in categoryTransactions)
-                    {
-                        var amountInBudgetCurrency = await _conversionService.ConvertAsync(
-                            transaction.ConvertedAmount,
-                            transaction.ConvertedCurrencyId,
-                            budget.CurrencyId);
-
-                        categorySpent += amountInBudgetCurrency;
-                    }
-
-                    decimal categoryRemaining = budgetCategory.Amount - categorySpent;
-                    decimal categoryPercentage = budgetCategory.Amount > 0
-                        ? (categorySpent / budgetCategory.Amount) * 100
-                        : 0;
-
-                    budgetItem.Categories.Add(new ActiveBudgetCategoryDto
-                    {
-                        CategoryId = budgetCategory.CategoryId,
-                        CategoryName = budgetCategory.Category.Name,
-                        AllocatedAmount = budgetCategory.Amount,
-                        SpentAmount = Math.Round(categorySpent, 2),
-                        RemainingAmount = Math.Round(categoryRemaining, 2),
-                        PercentageSpent = Math.Round(categoryPercentage, 2)
-                    });
-                }
-            }
 
             budgetItems.Add(budgetItem);
         }

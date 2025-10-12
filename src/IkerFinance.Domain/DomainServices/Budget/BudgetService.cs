@@ -14,21 +14,21 @@ public class BudgetService
     /// </summary>
     public BudgetEntity Create(
         string userId,
-        string name,
+        int categoryId,
         int currencyId,
         decimal amount,
         BudgetPeriod period,
         DateTime startDate,
         string? description)
     {
-        ValidateParameters(userId, name, amount);
+        ValidateParameters(userId, categoryId, amount);
 
         var endDate = CalculateEndDate(startDate, period);
 
         return new BudgetEntity
         {
             UserId = userId,
-            Name = name,
+            CategoryId = categoryId,
             CurrencyId = currencyId,
             Amount = amount,
             Period = period,
@@ -49,7 +49,7 @@ public class BudgetService
     /// </summary>
     public void Update(
         BudgetEntity budget,
-        string name,
+        int categoryId,
         int currencyId,
         decimal amount,
         BudgetPeriod period,
@@ -60,11 +60,11 @@ public class BudgetService
         if (budget == null)
             throw new ArgumentNullException(nameof(budget));
 
-        ValidateParameters(budget.UserId, name, amount);
+        ValidateParameters(budget.UserId, categoryId, amount);
 
         var endDate = CalculateEndDate(startDate, period);
 
-        budget.Name = name;
+        budget.CategoryId = categoryId;
         budget.CurrencyId = currencyId;
         budget.Amount = amount;
         budget.Period = period;
@@ -91,13 +91,13 @@ public class BudgetService
         };
     }
 
-    private void ValidateParameters(string userId, string name, decimal amount)
+    private void ValidateParameters(string userId, int categoryId, decimal amount)
     {
         if (string.IsNullOrWhiteSpace(userId))
             throw new ArgumentException("User ID cannot be empty", nameof(userId));
 
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Budget name cannot be empty", nameof(name));
+        if (categoryId <= 0)
+            throw new ArgumentException("Category ID must be valid", nameof(categoryId));
 
         if (amount <= 0)
             throw new ArgumentException("Budget amount must be positive", nameof(amount));

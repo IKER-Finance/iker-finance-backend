@@ -20,7 +20,10 @@ public class ActiveBudgetsSummaryDto
 public class ActiveBudgetItemDto
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string? CategoryIcon { get; set; }
+    public string? CategoryColor { get; set; }
     public decimal Amount { get; set; }
     public decimal SpentAmount { get; set; }
     public decimal RemainingAmount { get; set; }
@@ -30,17 +33,4 @@ public class ActiveBudgetItemDto
     public string CurrencySymbol { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-
-    // Optional category breakdown
-    public List<ActiveBudgetCategoryDto>? Categories { get; set; }
-}
-
-public class ActiveBudgetCategoryDto
-{
-    public int CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public decimal AllocatedAmount { get; set; }
-    public decimal SpentAmount { get; set; }
-    public decimal RemainingAmount { get; set; }
-    public decimal PercentageSpent { get; set; }
 }

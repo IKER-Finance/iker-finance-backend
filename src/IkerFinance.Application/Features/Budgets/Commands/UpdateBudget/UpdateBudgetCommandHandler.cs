@@ -48,22 +48,35 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
                 throw new ValidationException("Budget currency needs exchange rate to home currency");
         }
 
-        List<Category> categories = new();
-        if (request.CategoryAllocations.Any())
-        {
-            var categoryIds = request.CategoryAllocations.Select(a => a.CategoryId).ToList();
-            var categoriesResult = await _context.Categories
-                .Where(c => categoryIds.Contains(c.Id))
-                .ToListAsync(cancellationToken);
-            categories = categoriesResult;
+        // Validate category exists and is active
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == request.CategoryId && c.IsActive, cancellationToken);
+        if (category == null)
+            throw new NotFoundException("Category", request.CategoryId);
 
-            if (categories.Count != categoryIds.Count)
-                throw new NotFoundException("One or more categories not found");
+        // Check for existing budget with same category if category is being changed
+        if (budget.CategoryId != request.CategoryId)
+        {
+            var endDate = _budgetService.CalculateEndDate(request.StartDate, request.Period);
+            var existingBudget = await _context.Budgets
+                .AnyAsync(b =>
+                    b.Id != request.Id &&
+                    b.UserId == request.UserId &&
+                    b.CategoryId == request.CategoryId &&
+                    b.Period == request.Period &&
+                    b.IsActive &&
+                    ((b.StartDate <= request.StartDate && b.EndDate >= request.StartDate) ||
+                     (b.StartDate <= endDate && b.EndDate >= endDate) ||
+                     (b.StartDate >= request.StartDate && b.EndDate <= endDate)),
+                    cancellationToken);
+
+            if (existingBudget)
+                throw new ValidationException($"An active {request.Period} budget already exists for category '{category.Name}'");
         }
 
         _budgetService.Update(
             budget: budget,
-            name: request.Name,
+            categoryId: request.CategoryId,
             currencyId: request.CurrencyId,
             amount: request.Amount,
             period: request.Period,
@@ -72,48 +85,34 @@ public sealed class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCom
             isActive: request.IsActive
         );
 
-        var existingCategories = budget.Categories.ToList();
-        foreach (var existing in existingCategories)
-        {
-            _context.Remove(existing);
-        }
-
-        foreach (var allocation in request.CategoryAllocations)
-        {
-            var budgetCategory = new BudgetCategory
-            {
-                BudgetId = budget.Id,
-                CategoryId = allocation.CategoryId,
-                Amount = allocation.Amount
-            };
-            _context.Add(budgetCategory);
-        }
-
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Load with includes for response
+        budget = await _context.Budgets
+            .Include(b => b.Category)
+            .Include(b => b.Currency)
+            .FirstAsync(b => b.Id == budget.Id, cancellationToken);
 
         return new BudgetDto
         {
             Id = budget.Id,
-            Name = budget.Name,
+            CategoryId = budget.CategoryId,
+            CategoryName = budget.Category.Name,
+            CategoryIcon = budget.Category.Icon,
+            CategoryColor = budget.Category.Color,
             Period = budget.Period,
             StartDate = budget.StartDate,
             EndDate = budget.EndDate,
             Amount = budget.Amount,
             CurrencyId = budget.CurrencyId,
-            CurrencyCode = currency.Code,
-            CurrencySymbol = currency.Symbol,
+            CurrencyCode = budget.Currency.Code,
+            CurrencySymbol = budget.Currency.Symbol,
             IsActive = budget.IsActive,
             Description = budget.Description,
             AllowOverlap = budget.AllowOverlap,
             AlertAt80Percent = budget.AlertAt80Percent,
             AlertAt100Percent = budget.AlertAt100Percent,
             AlertsEnabled = budget.AlertsEnabled,
-            Categories = request.CategoryAllocations.Select(a => new BudgetCategoryDto
-            {
-                CategoryId = a.CategoryId,
-                CategoryName = categories.First(c => c.Id == a.CategoryId).Name,
-                Amount = a.Amount
-            }).ToList(),
             CreatedAt = budget.CreatedAt
         };
     }

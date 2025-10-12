@@ -24,19 +24,18 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
         // Fetch budget with includes
         var budget = await _context.Budgets
             .Include(b => b.Currency)
-            .Include(b => b.Categories)
-                .ThenInclude(bc => bc.Category)
+            .Include(b => b.Category)
             .FirstOrDefaultAsync(b => b.Id == request.BudgetId && b.UserId == request.UserId, cancellationToken);
 
         if (budget == null)
             throw new NotFoundException("Budget", request.BudgetId);
 
-        // Fetch all expense transactions in budget period
+        // Fetch all expense transactions for this category in budget period
         var transactions = await _context.Transactions
             .Include(t => t.ConvertedCurrency)
-            .Include(t => t.Category)
             .Where(t => t.UserId == request.UserId
                 && t.Type == TransactionType.Expense
+                && t.CategoryId == budget.CategoryId
                 && t.Date >= budget.StartDate
                 && t.Date <= budget.EndDate)
             .ToListAsync(cancellationToken);
@@ -60,47 +59,14 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
         decimal percentageSpent = budget.Amount > 0 ? (totalSpent / budget.Amount) * 100 : 0;
         string status = DetermineStatus(percentageSpent);
 
-        // Calculate category-level spending
-        var categorySummaries = new List<BudgetCategorySummaryDto>();
-        foreach (var budgetCategory in budget.Categories)
-        {
-            decimal categorySpent = 0;
-
-            // Get transactions for this category
-            var categoryTransactions = transactions.Where(t => t.CategoryId == budgetCategory.CategoryId);
-
-            foreach (var transaction in categoryTransactions)
-            {
-                var amountInBudgetCurrency = await _conversionService.ConvertAsync(
-                    transaction.ConvertedAmount,
-                    transaction.ConvertedCurrencyId,
-                    budget.CurrencyId);
-
-                categorySpent += amountInBudgetCurrency;
-            }
-
-            decimal categoryRemaining = budgetCategory.Amount - categorySpent;
-            decimal categoryPercentage = budgetCategory.Amount > 0
-                ? (categorySpent / budgetCategory.Amount) * 100
-                : 0;
-
-            categorySummaries.Add(new BudgetCategorySummaryDto
-            {
-                CategoryId = budgetCategory.CategoryId,
-                CategoryName = budgetCategory.Category.Name,
-                AllocatedAmount = budgetCategory.Amount,
-                SpentAmount = Math.Round(categorySpent, 2),
-                RemainingAmount = Math.Round(categoryRemaining, 2),
-                PercentageSpent = Math.Round(categoryPercentage, 2),
-                Status = DetermineStatus(categoryPercentage)
-            });
-        }
-
         // Build response
         return new BudgetSummaryDto
         {
             BudgetId = budget.Id,
-            Name = budget.Name,
+            CategoryId = budget.CategoryId,
+            CategoryName = budget.Category.Name,
+            CategoryIcon = budget.Category.Icon,
+            CategoryColor = budget.Category.Color,
             Amount = budget.Amount,
             CurrencyCode = budget.Currency.Code,
             CurrencySymbol = budget.Currency.Symbol,
@@ -112,7 +78,6 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
             StartDate = budget.StartDate,
             EndDate = budget.EndDate,
             Description = budget.Description,
-            Categories = categorySummaries,
             TransactionCount = transactions.Count,
             AlertAt80Percent = percentageSpent >= 80 && percentageSpent < 100,
             AlertAt100Percent = percentageSpent >= 100

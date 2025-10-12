@@ -5,7 +5,10 @@ namespace IkerFinance.Application.DTOs.Budgets;
 public class BudgetDto
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string? CategoryIcon { get; set; }
+    public string? CategoryColor { get; set; }
     public BudgetPeriod Period { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
@@ -19,13 +22,5 @@ public class BudgetDto
     public decimal AlertAt80Percent { get; set; }
     public decimal AlertAt100Percent { get; set; }
     public bool AlertsEnabled { get; set; }
-    public List<BudgetCategoryDto> Categories { get; set; } = new();
     public DateTime CreatedAt { get; set; }
-}
-
-public class BudgetCategoryDto
-{
-    public int CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
 }

@@ -6,11 +6,9 @@ public class CreateBudgetCommandValidator : AbstractValidator<CreateBudgetComman
 {
     public CreateBudgetCommandValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .WithMessage("Budget name is required")
-            .MaximumLength(100)
-            .WithMessage("Budget name cannot exceed 100 characters");
+        RuleFor(x => x.CategoryId)
+            .GreaterThan(0)
+            .WithMessage("Category is required");
 
         RuleFor(x => x.Amount)
             .GreaterThan(0)
@@ -32,15 +30,5 @@ public class CreateBudgetCommandValidator : AbstractValidator<CreateBudgetComman
             .MaximumLength(500)
             .WithMessage("Description cannot exceed 500 characters")
             .When(x => !string.IsNullOrEmpty(x.Description));
-
-        RuleFor(x => x.CategoryAllocations)
-            .Must(allocations => allocations.All(a => a.Amount > 0))
-            .WithMessage("All category allocations must have amounts greater than zero")
-            .When(x => x.CategoryAllocations.Any());
-
-        RuleFor(x => x.CategoryAllocations)
-            .Must((command, allocations) => allocations.Sum(a => a.Amount) <= command.Amount)
-            .WithMessage("Total category allocations cannot exceed budget amount")
-            .When(x => x.CategoryAllocations.Any());
     }
 }

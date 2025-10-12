@@ -15,7 +15,6 @@ public class Category : AuditableEntity
     public int SortOrder { get; set; } = 0;
     
     public string? UserId { get; set; }
-    
+
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
-    public virtual ICollection<BudgetCategory> BudgetCategories { get; set; } = new List<BudgetCategory>();
 }

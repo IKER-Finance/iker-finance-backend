@@ -10,7 +10,10 @@ public class BudgetImpactPreviewDto
 public class AffectedBudgetDto
 {
     public int BudgetId { get; set; }
-    public string BudgetName { get; set; } = string.Empty;
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string? CategoryIcon { get; set; }
+    public string? CategoryColor { get; set; }
 
     // Current State
     public decimal CurrentSpent { get; set; }
@@ -31,18 +34,4 @@ public class AffectedBudgetDto
     // Currency Info
     public string CurrencyCode { get; set; } = string.Empty;
     public string CurrencySymbol { get; set; } = string.Empty;
-
-    // Category Impact (if budget has category allocation)
-    public AffectedCategoryDto? AffectedCategory { get; set; }
-}
-
-public class AffectedCategoryDto
-{
-    public int CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public decimal Allocated { get; set; }
-    public decimal CurrentSpent { get; set; }
-    public decimal AfterSpent { get; set; }
-    public bool WillExceed { get; set; }
-    public decimal ExceedAmount { get; set; }
 }

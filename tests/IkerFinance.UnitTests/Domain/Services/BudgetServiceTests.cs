@@ -22,7 +22,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Daily Budget",
+            categoryId: 1,
             currencyId: 1,
             amount: 100m,
             period: BudgetPeriod.Daily,
@@ -42,7 +42,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Weekly Budget",
+            categoryId: 1,
             currencyId: 1,
             amount: 500m,
             period: BudgetPeriod.Weekly,
@@ -62,7 +62,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Monthly Budget",
+            categoryId: 1,
             currencyId: 1,
             amount: 2000m,
             period: BudgetPeriod.Monthly,
@@ -82,7 +82,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Quarterly Budget",
+            categoryId: 2,
             currencyId: 1,
             amount: 6000m,
             period: BudgetPeriod.Quarterly,
@@ -102,7 +102,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Yearly Budget",
+            categoryId: 3,
             currencyId: 1,
             amount: 24000m,
             period: BudgetPeriod.Yearly,
@@ -120,7 +120,7 @@ public class BudgetServiceTests
     {
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Test Budget",
+            categoryId: 5,
             currencyId: 2,
             amount: 1000m,
             period: BudgetPeriod.Monthly,
@@ -129,7 +129,7 @@ public class BudgetServiceTests
         );
 
         result.UserId.Should().Be("user123");
-        result.Name.Should().Be("Test Budget");
+        result.CategoryId.Should().Be(5);
         result.CurrencyId.Should().Be(2);
         result.Amount.Should().Be(1000m);
         result.Description.Should().Be("Description");
@@ -148,7 +148,7 @@ public class BudgetServiceTests
         {
             Id = 1,
             UserId = "user123",
-            Name = "Old Budget",
+            CategoryId = 1,
             CurrencyId = 1,
             Amount = 1000m,
             Period = BudgetPeriod.Monthly,
@@ -159,7 +159,7 @@ public class BudgetServiceTests
 
         _budgetService.Update(
             budget: budget,
-            name: "Updated Budget",
+            categoryId: 2,
             currencyId: 2,
             amount: 2000m,
             period: BudgetPeriod.Quarterly,
@@ -168,7 +168,7 @@ public class BudgetServiceTests
             isActive: false
         );
 
-        budget.Name.Should().Be("Updated Budget");
+        budget.CategoryId.Should().Be(2);
         budget.CurrencyId.Should().Be(2);
         budget.Amount.Should().Be(2000m);
         budget.Period.Should().Be(BudgetPeriod.Quarterly);
@@ -185,7 +185,7 @@ public class BudgetServiceTests
         {
             Id = 1,
             UserId = "user123",
-            Name = "Budget",
+            CategoryId = 1,
             CurrencyId = 1,
             Amount = 1000m,
             Period = BudgetPeriod.Monthly,
@@ -195,7 +195,7 @@ public class BudgetServiceTests
 
         _budgetService.Update(
             budget: budget,
-            name: "Budget",
+            categoryId: 1,
             currencyId: 1,
             amount: 1000m,
             period: BudgetPeriod.Monthly,
@@ -216,7 +216,7 @@ public class BudgetServiceTests
         {
             Id = 1,
             UserId = "user123",
-            Name = "Budget",
+            CategoryId = 1,
             CurrencyId = 1,
             Amount = 1000m,
             Period = BudgetPeriod.Monthly,
@@ -228,7 +228,7 @@ public class BudgetServiceTests
 
         _budgetService.Update(
             budget: budget,
-            name: "Updated",
+            categoryId: 1,
             currencyId: 1,
             amount: 1500m,
             period: BudgetPeriod.Monthly,
@@ -248,7 +248,7 @@ public class BudgetServiceTests
 
         var result = _budgetService.Create(
             userId: "user123",
-            name: "Leap Year Test",
+            categoryId: 1,
             currencyId: 1,
             amount: 1000m,
             period: BudgetPeriod.Monthly,
