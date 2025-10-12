@@ -8,7 +8,6 @@ COPY ["src/IkerFinance.API/IkerFinance.API.csproj", "src/IkerFinance.API/"]
 COPY ["src/IkerFinance.Application/IkerFinance.Application.csproj", "src/IkerFinance.Application/"]
 COPY ["src/IkerFinance.Infrastructure/IkerFinance.Infrastructure.csproj", "src/IkerFinance.Infrastructure/"]
 COPY ["src/IkerFinance.Domain/IkerFinance.Domain.csproj", "src/IkerFinance.Domain/"]
-COPY ["src/IkerFinance.Shared/IkerFinance.Shared.csproj", "src/IkerFinance.Shared/"]
 
 RUN dotnet restore "src/IkerFinance.API/IkerFinance.API.csproj"
 COPY . .

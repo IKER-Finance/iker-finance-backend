@@ -7,6 +7,9 @@ using IkerFinance.Application.Features.Budgets.Commands.UpdateBudget;
 using IkerFinance.Application.Features.Budgets.Commands.DeleteBudget;
 using IkerFinance.Application.Features.Budgets.Queries.GetBudgets;
 using IkerFinance.Application.Features.Budgets.Queries.GetBudgetById;
+using IkerFinance.Application.Features.Budgets.Queries.GetBudgetSummary;
+using IkerFinance.Application.Features.Budgets.Queries.GetActiveBudgets;
+using IkerFinance.Application.Features.Budgets.Queries.PreviewBudgetImpact;
 
 namespace IkerFinance.API.Controllers;
 
@@ -72,9 +75,50 @@ public class BudgetsController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var command = new DeleteBudgetCommand { Id = id, UserId = userId! };
-        
+
         _logger.LogInformation("Deleting budget {Id} for user: {UserId}", id, userId);
         await _mediator.Send(command);
         return NoContent();
+    }
+
+    [HttpGet("{id}/summary")]
+    public async Task<IActionResult> GetBudgetSummary(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var query = new GetBudgetSummaryQuery
+        {
+            BudgetId = id,
+            UserId = userId!
+        };
+
+        _logger.LogInformation("Getting budget summary for budget {BudgetId}, user: {UserId}", id, userId);
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActiveBudgets([FromQuery] bool includeCategories = true)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var query = new GetActiveBudgetsQuery
+        {
+            UserId = userId!,
+            IncludeCategories = includeCategories
+        };
+
+        _logger.LogInformation("Getting active budgets for user: {UserId}", userId);
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpPost("preview-impact")]
+    public async Task<IActionResult> PreviewBudgetImpact([FromBody] PreviewBudgetImpactQuery query)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        query.UserId = userId!;
+
+        _logger.LogInformation("Previewing budget impact for user: {UserId}", userId);
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 }
