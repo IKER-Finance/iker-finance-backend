@@ -49,21 +49,14 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
             };
         }
 
-        // Convert transaction amount to home currency first (for pivot conversion)
-        decimal transactionInHome = await _conversionService.ConvertAsync(
-            request.Amount,
-            request.CurrencyId,
-            user.HomeCurrencyId.Value);
-
         var affectedBudgets = new List<AffectedBudgetDto>();
         var warnings = new List<string>();
         bool hasWarnings = false;
 
-        // Calculate impact on each budget
         foreach (var budget in affectingBudgets)
         {
-            // Get existing transactions for this category in budget period
             var transactions = await _context.Transactions
+                .Include(t => t.Currency)
                 .Where(t => t.UserId == request.UserId
                     && t.Type == TransactionType.Expense
                     && t.CategoryId == budget.CategoryId
@@ -71,23 +64,44 @@ public sealed class PreviewBudgetImpactQueryHandler : IRequestHandler<PreviewBud
                     && t.Date <= budget.EndDate)
                 .ToListAsync(cancellationToken);
 
-            // Calculate current spent
             decimal currentSpent = 0;
             foreach (var transaction in transactions)
             {
-                var amountInBudgetCurrency = await _conversionService.ConvertAsync(
-                    transaction.ConvertedAmount,
-                    transaction.ConvertedCurrencyId,
-                    budget.CurrencyId);
+                decimal amountInBudgetCurrency;
+
+                if (transaction.CurrencyId == budget.CurrencyId)
+                {
+                    amountInBudgetCurrency = transaction.Amount;
+                }
+                else
+                {
+                    amountInBudgetCurrency = await _conversionService.ConvertAsync(
+                        transaction.ConvertedAmount,
+                        transaction.ConvertedCurrencyId,
+                        budget.CurrencyId);
+                }
 
                 currentSpent += amountInBudgetCurrency;
             }
 
-            // Convert new transaction amount to budget currency (via home pivot)
-            decimal newTransactionInBudgetCurrency = await _conversionService.ConvertAsync(
-                transactionInHome,
-                user.HomeCurrencyId.Value,
-                budget.CurrencyId);
+            decimal newTransactionInBudgetCurrency;
+
+            if (request.CurrencyId == budget.CurrencyId)
+            {
+                newTransactionInBudgetCurrency = request.Amount;
+            }
+            else
+            {
+                decimal transactionInHome = await _conversionService.ConvertAsync(
+                    request.Amount,
+                    request.CurrencyId,
+                    user.HomeCurrencyId.Value);
+
+                newTransactionInBudgetCurrency = await _conversionService.ConvertAsync(
+                    transactionInHome,
+                    user.HomeCurrencyId.Value,
+                    budget.CurrencyId);
+            }
 
             // Calculate after state
             decimal afterSpent = currentSpent + newTransactionInBudgetCurrency;

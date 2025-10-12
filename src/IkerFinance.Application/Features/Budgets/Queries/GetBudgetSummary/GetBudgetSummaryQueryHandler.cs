@@ -30,8 +30,8 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
         if (budget == null)
             throw new NotFoundException("Budget", request.BudgetId);
 
-        // Fetch all expense transactions for this category in budget period
         var transactions = await _context.Transactions
+            .Include(t => t.Currency)
             .Include(t => t.ConvertedCurrency)
             .Where(t => t.UserId == request.UserId
                 && t.Type == TransactionType.Expense
@@ -40,16 +40,22 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
                 && t.Date <= budget.EndDate)
             .ToListAsync(cancellationToken);
 
-        // Calculate total spent by converting all transactions to budget currency
         decimal totalSpent = 0;
         foreach (var transaction in transactions)
         {
-            // Transaction.ConvertedAmount is already in home currency
-            // Convert from home currency to budget currency
-            var amountInBudgetCurrency = await _conversionService.ConvertAsync(
-                transaction.ConvertedAmount,
-                transaction.ConvertedCurrencyId,
-                budget.CurrencyId);
+            decimal amountInBudgetCurrency;
+
+            if (transaction.CurrencyId == budget.CurrencyId)
+            {
+                amountInBudgetCurrency = transaction.Amount;
+            }
+            else
+            {
+                amountInBudgetCurrency = await _conversionService.ConvertAsync(
+                    transaction.ConvertedAmount,
+                    transaction.ConvertedCurrencyId,
+                    budget.CurrencyId);
+            }
 
             totalSpent += amountInBudgetCurrency;
         }
