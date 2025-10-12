@@ -1,6 +1,6 @@
 using IkerFinance.Application.Common.Queries;
-using IkerFinance.Shared.DTOs.Common;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Common;
+using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactions;
 

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Features.Auth.Commands.Register;
+using IkerFinance.Application.Common.Identity;
 using IkerFinance.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Moq;

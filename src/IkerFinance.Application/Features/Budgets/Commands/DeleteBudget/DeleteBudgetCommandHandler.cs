@@ -5,7 +5,7 @@ using IkerFinance.Application.Common.Exceptions;
 
 namespace IkerFinance.Application.Features.Budgets.Commands.DeleteBudget;
 
-public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, Unit>
+public sealed class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, Unit>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,14 +17,12 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
     public async Task<Unit> Handle(DeleteBudgetCommand request, CancellationToken cancellationToken)
     {
         var budget = await _context.Budgets
-            .Include(b => b.Categories)
-            .Where(b => b.Id == request.Id && b.UserId == request.UserId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(b => b.Id == request.Id && b.UserId == request.UserId, cancellationToken);
 
         if (budget == null)
             throw new NotFoundException("Budget", request.Id);
 
-        _context.Budgets.Remove(budget);
+        _context.Remove(budget);
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

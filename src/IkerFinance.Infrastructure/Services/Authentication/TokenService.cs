@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Domain.Entities;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Infrastructure.Services.Authentication;
 

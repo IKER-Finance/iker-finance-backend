@@ -1,17 +1,17 @@
 using FluentAssertions;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Domain.Services;
+using IkerFinance.Domain.DomainServices.Budget;
 
 namespace IkerFinance.UnitTests.Domain.Services;
 
 public class BudgetServiceTests
 {
-    private readonly BudgetService _service;
+    private readonly BudgetService _budgetService;
 
     public BudgetServiceTests()
     {
-        _service = new BudgetService();
+        _budgetService = new BudgetService();
     }
 
     // Test: Daily budget period adds 1 day to start date
@@ -20,7 +20,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Daily Budget",
             currencyId: 1,
@@ -31,7 +31,7 @@ public class BudgetServiceTests
         );
 
         result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2025, 1, 2));
+        result.EndDate.Should().Be(new DateTime(2025, 1, 1, 23, 59, 59));
     }
 
     // Test: Weekly budget period adds 7 days to start date
@@ -40,7 +40,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Weekly Budget",
             currencyId: 1,
@@ -51,7 +51,7 @@ public class BudgetServiceTests
         );
 
         result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2025, 1, 8));
+        result.EndDate.Should().Be(new DateTime(2025, 1, 7, 23, 59, 59));
     }
 
     // Test: Monthly budget period adds 1 month to start date
@@ -60,7 +60,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 15);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Monthly Budget",
             currencyId: 1,
@@ -71,7 +71,7 @@ public class BudgetServiceTests
         );
 
         result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2025, 2, 15));
+        result.EndDate.Should().Be(new DateTime(2025, 2, 14, 23, 59, 59));
     }
 
     // Test: Quarterly budget period adds 3 months to start date
@@ -80,7 +80,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 1, 1);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Quarterly Budget",
             currencyId: 1,
@@ -91,7 +91,7 @@ public class BudgetServiceTests
         );
 
         result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2025, 4, 1));
+        result.EndDate.Should().Be(new DateTime(2025, 3, 31, 23, 59, 59));
     }
 
     // Test: Yearly budget period adds 1 year to start date
@@ -100,7 +100,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2025, 3, 15);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Yearly Budget",
             currencyId: 1,
@@ -111,14 +111,14 @@ public class BudgetServiceTests
         );
 
         result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2026, 3, 15));
+        result.EndDate.Should().Be(new DateTime(2026, 3, 14, 23, 59, 59));
     }
 
     // Test: Budget creation sets default properties correctly
     [Fact]
     public void Create_SetsDefaultProperties()
     {
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Test Budget",
             currencyId: 2,
@@ -157,7 +157,7 @@ public class BudgetServiceTests
             IsActive = true
         };
 
-        _service.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Updated Budget",
             currencyId: 2,
@@ -172,7 +172,7 @@ public class BudgetServiceTests
         budget.CurrencyId.Should().Be(2);
         budget.Amount.Should().Be(2000m);
         budget.Period.Should().Be(BudgetPeriod.Quarterly);
-        budget.EndDate.Should().Be(new DateTime(2025, 4, 1));
+        budget.EndDate.Should().Be(new DateTime(2025, 3, 31, 23, 59, 59));
         budget.Description.Should().Be("New description");
         budget.IsActive.Should().BeFalse();
     }
@@ -193,7 +193,7 @@ public class BudgetServiceTests
             EndDate = new DateTime(2025, 2, 1)
         };
 
-        _service.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Budget",
             currencyId: 1,
@@ -205,7 +205,7 @@ public class BudgetServiceTests
         );
 
         budget.StartDate.Should().Be(new DateTime(2025, 2, 15));
-        budget.EndDate.Should().Be(new DateTime(2025, 3, 15));
+        budget.EndDate.Should().Be(new DateTime(2025, 3, 14, 23, 59, 59));
     }
 
     // Test: Update method sets UpdatedAt timestamp
@@ -226,7 +226,7 @@ public class BudgetServiceTests
 
         var beforeUpdate = DateTime.UtcNow;
 
-        _service.Update(
+        _budgetService.Update(
             budget: budget,
             name: "Updated",
             currencyId: 1,
@@ -246,7 +246,7 @@ public class BudgetServiceTests
     {
         var startDate = new DateTime(2024, 1, 31);
 
-        var result = _service.Create(
+        var result = _budgetService.Create(
             userId: "user123",
             name: "Leap Year Test",
             currencyId: 1,
@@ -256,6 +256,6 @@ public class BudgetServiceTests
             description: null
         );
 
-        result.EndDate.Should().Be(new DateTime(2024, 2, 29));
+        result.EndDate.Should().Be(new DateTime(2024, 2, 28, 23, 59, 59));
     }
 }

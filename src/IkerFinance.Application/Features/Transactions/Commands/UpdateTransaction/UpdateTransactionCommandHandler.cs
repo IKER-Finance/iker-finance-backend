@@ -2,12 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Domain.Services;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Domain.DomainServices.Transaction;
+using IkerFinance.Application.DTOs.Transactions;
+using IkerFinance.Domain.Entities;
+using IkerFinance.Application.Common.Identity;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.UpdateTransaction;
 
-public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand, TransactionDto>
+public sealed class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand, TransactionDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
@@ -15,39 +17,43 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
 
     public UpdateTransactionCommandHandler(
         IApplicationDbContext context,
-        ICurrencyConversionService conversionService)
+        ICurrencyConversionService conversionService,
+        TransactionService transactionService)
     {
         _context = context;
         _conversionService = conversionService;
-        _transactionService = new TransactionService();
+        _transactionService = transactionService;
     }
 
     public async Task<TransactionDto> Handle(
-        UpdateTransactionCommand request, 
+        UpdateTransactionCommand request,
         CancellationToken cancellationToken)
     {
         var transaction = await _context.Transactions
-            .Include(t => t.User)
-            .Include(t => t.Currency)
-            .Include(t => t.Category)
             .FirstOrDefaultAsync(t => t.Id == request.Id && t.UserId == request.UserId, cancellationToken);
 
         if (transaction == null)
             throw new NotFoundException("Transaction", request.Id);
 
-        var user = transaction.User;
-        if (!user.HomeCurrencyId.HasValue)
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+        if (user == null || !user.HomeCurrencyId.HasValue)
             throw new ValidationException("User home currency not set");
 
-        var category = await _context.Categories.FindAsync(new object[] { request.CategoryId }, cancellationToken);
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == request.CategoryId, cancellationToken);
         if (category == null)
             throw new NotFoundException("Category", request.CategoryId);
 
-        var currency = await _context.Currencies.FindAsync(new object[] { request.CurrencyId }, cancellationToken);
+        var currency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
         var homeCurrencyId = user.HomeCurrencyId.Value;
+
+        var homeCurrency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == homeCurrencyId, cancellationToken);
 
         Domain.Entities.ExchangeRate? exchangeRate = null;
         if (request.CurrencyId != homeCurrencyId)
@@ -83,7 +89,7 @@ public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransaction
             CurrencySymbol = currency.Symbol,
             ConvertedAmount = transaction.ConvertedAmount,
             ConvertedCurrencyId = transaction.ConvertedCurrencyId,
-            ConvertedCurrencyCode = user.HomeCurrency!.Code,
+            ConvertedCurrencyCode = homeCurrency!.Code,
             ExchangeRate = transaction.ExchangeRate,
             Type = transaction.Type,
             Description = transaction.Description,

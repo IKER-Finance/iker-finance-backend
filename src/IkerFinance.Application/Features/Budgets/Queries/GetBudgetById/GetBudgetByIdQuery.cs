@@ -1,5 +1,5 @@
 using MediatR;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Queries.GetBudgetById;
 

@@ -1,6 +1,6 @@
 using MediatR;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Shared.DTOs.Budgets;
+using IkerFinance.Application.DTOs.Budgets;
 
 namespace IkerFinance.Application.Features.Budgets.Commands.CreateBudget;
 

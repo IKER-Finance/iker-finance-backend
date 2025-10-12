@@ -1,4 +1,4 @@
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Transactions;
 using MediatR;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;

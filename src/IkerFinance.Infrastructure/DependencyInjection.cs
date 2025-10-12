@@ -3,10 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using IkerFinance.Infrastructure.Data;
-using IkerFinance.Domain.Entities;
 using IkerFinance.Application.Common.Interfaces;
+using IkerFinance.Application.Common.Identity;
 using IkerFinance.Infrastructure.Services.Authentication;
 using IkerFinance.Infrastructure.Services;
+using IkerFinance.Infrastructure.Repositories;
 
 namespace IkerFinance.Infrastructure;
 
@@ -45,7 +46,9 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
-        
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IBudgetRepository, BudgetRepository>();
+
         return services;
     }
 }

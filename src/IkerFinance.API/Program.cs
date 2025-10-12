@@ -1,15 +1,17 @@
 using IkerFinance.API.Extensions;
 using IkerFinance.API.Middleware;
 using IkerFinance.Application;
+using IkerFinance.Domain;
 using IkerFinance.Infrastructure;
 using IkerFinance.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApiServices(builder.Configuration);
+builder.Services.AddDomain();
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration); 
+builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
@@ -44,3 +46,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+namespace IkerFinance.API
+{
+    public partial class Program { }
+}

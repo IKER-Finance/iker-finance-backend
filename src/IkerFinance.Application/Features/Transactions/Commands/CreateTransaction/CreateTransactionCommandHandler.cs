@@ -1,13 +1,15 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Domain.Services;
-using IkerFinance.Shared.DTOs.Transactions;
-using Microsoft.EntityFrameworkCore;
+using IkerFinance.Domain.DomainServices.Transaction;
+using IkerFinance.Application.DTOs.Transactions;
+using IkerFinance.Application.Common.Identity;
+using IkerFinance.Domain.Entities;
 
 namespace IkerFinance.Application.Features.Transactions.Commands.CreateTransaction;
 
-public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>
+public sealed class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly ICurrencyConversionService _conversionService;
@@ -15,11 +17,12 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 
     public CreateTransactionCommandHandler(
         IApplicationDbContext context,
-        ICurrencyConversionService conversionService)
+        ICurrencyConversionService conversionService,
+        TransactionService transactionService)
     {
         _context = context;
         _conversionService = conversionService;
-        _transactionService = new TransactionService();
+        _transactionService = transactionService;
     }
 
     public async Task<TransactionDto> Handle(
@@ -27,20 +30,24 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
         CancellationToken cancellationToken)
     {
         var user = await _context.Users
-            .Include(u => u.HomeCurrency)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
         if (user == null || !user.HomeCurrencyId.HasValue)
             throw new NotFoundException("User", request.UserId);
 
-        var category = await _context.Categories.FindAsync(new object[] { request.CategoryId }, cancellationToken);
+        var category = await _context.Categories
+            .FirstOrDefaultAsync(c => c.Id == request.CategoryId, cancellationToken);
         if (category == null)
             throw new NotFoundException("Category", request.CategoryId);
 
-        var currency = await _context.Currencies.FindAsync(new object[] { request.CurrencyId }, cancellationToken);
+        var currency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken);
         if (currency == null || !currency.IsActive)
             throw new ValidationException("Invalid or inactive currency");
 
         var homeCurrencyId = user.HomeCurrencyId.Value;
+
+        var homeCurrency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == homeCurrencyId, cancellationToken);
 
         Domain.Entities.ExchangeRate? exchangeRate = null;
         if (request.CurrencyId != homeCurrencyId)
@@ -65,7 +72,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             exchangeRate: exchangeRate
         );
 
-        _context.Transactions.Add(transaction);
+        _context.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);
 
         return new TransactionDto
@@ -77,7 +84,7 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
             CurrencySymbol = currency.Symbol,
             ConvertedAmount = transaction.ConvertedAmount,
             ConvertedCurrencyId = transaction.ConvertedCurrencyId,
-            ConvertedCurrencyCode = user.HomeCurrency!.Code,
+            ConvertedCurrencyCode = homeCurrency!.Code,
             ExchangeRate = transaction.ExchangeRate,
             Type = transaction.Type,
             Description = transaction.Description,

@@ -6,7 +6,6 @@ namespace IkerFinance.Domain.Entities;
 public class Transaction : AuditableEntity
 {
     public string UserId { get; set; } = string.Empty;
-    public virtual ApplicationUser User { get; set; } = null!;
     
     public decimal Amount { get; set; }
     public int CurrencyId { get; set; }

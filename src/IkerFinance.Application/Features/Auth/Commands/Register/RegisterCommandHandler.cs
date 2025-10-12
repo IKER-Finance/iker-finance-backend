@@ -1,12 +1,12 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using IkerFinance.Domain.Entities;
-using IkerFinance.Shared.DTOs.Auth;
+using IkerFinance.Application.Common.Identity;
+using IkerFinance.Application.DTOs.Auth;
 using IkerFinance.Application.Common.Interfaces;
 
 namespace IkerFinance.Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
+public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;

@@ -1,11 +1,11 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
-using IkerFinance.Shared.DTOs.Currencies;
+using IkerFinance.Application.DTOs.Currencies;
 
 namespace IkerFinance.Application.Features.Currencies.Queries.GetCurrencies;
 
-public class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, List<CurrencyDto>>
+public sealed class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, List<CurrencyDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -15,7 +15,7 @@ public class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, Lis
     }
 
     public async Task<List<CurrencyDto>> Handle(
-        GetCurrenciesQuery request, 
+        GetCurrenciesQuery request,
         CancellationToken cancellationToken)
     {
         var currencies = await _context.Currencies

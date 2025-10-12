@@ -6,7 +6,6 @@ namespace IkerFinance.Domain.Entities;
 public class Budget : AuditableEntity
 {
     public string UserId { get; set; } = string.Empty;
-    public virtual ApplicationUser User { get; set; } = null!;
     
     public string Name { get; set; } = string.Empty;
     public BudgetPeriod Period { get; set; } = BudgetPeriod.Monthly;

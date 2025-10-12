@@ -1,17 +1,17 @@
 using FluentAssertions;
 using IkerFinance.Domain.Entities;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Domain.Services;
+using IkerFinance.Domain.DomainServices.Transaction;
 
 namespace IkerFinance.UnitTests.Domain.Services;
 
 public class TransactionServiceTests
 {
-    private readonly TransactionService _service;
+    private readonly TransactionService _transactionService;
 
     public TransactionServiceTests()
     {
-        _service = new TransactionService();
+        _transactionService = new TransactionService();
     }
 
     // Test: When transaction currency equals home currency, exchange rate should be 1.0
@@ -23,7 +23,7 @@ public class TransactionServiceTests
         var homeCurrencyId = 1;
         var amount = 100m;
 
-        var result = _service.Create(
+        var result = _transactionService.Create(
             userId: userId,
             amount: amount,
             currencyId: currencyId,
@@ -58,7 +58,7 @@ public class TransactionServiceTests
             IsActive = true
         };
 
-        var result = _service.Create(
+        var result = _transactionService.Create(
             userId: "user123",
             amount: 100m,
             currencyId: 2,
@@ -80,7 +80,7 @@ public class TransactionServiceTests
     [Fact]
     public void Create_WithCrossCurrencyAndNullRate_ThrowsException()
     {
-        var act = () => _service.Create(
+        var act = () => _transactionService.Create(
             userId: "user123",
             amount: 100m,
             currencyId: 2,
@@ -110,7 +110,7 @@ public class TransactionServiceTests
             IsActive = false
         };
 
-        var act = () => _service.Create(
+        var act = () => _transactionService.Create(
             userId: "user123",
             amount: 100m,
             currencyId: 2,
@@ -140,7 +140,7 @@ public class TransactionServiceTests
             IsActive = true
         };
 
-        var act = () => _service.Create(
+        var act = () => _transactionService.Create(
             userId: "user123",
             amount: 100m,
             currencyId: 2,
@@ -172,7 +172,7 @@ public class TransactionServiceTests
             ExchangeRate = 15.0m
         };
 
-        _service.Update(
+        _transactionService.Update(
             transaction: transaction,
             amount: 200m,
             currencyId: 1,
@@ -217,7 +217,7 @@ public class TransactionServiceTests
             IsActive = true
         };
 
-        _service.Update(
+        _transactionService.Update(
             transaction: transaction,
             amount: 50m,
             currencyId: 2,
@@ -249,7 +249,7 @@ public class TransactionServiceTests
             CurrencyId = 1
         };
 
-        var act = () => _service.Update(
+        var act = () => _transactionService.Update(
             transaction: transaction,
             amount: 100m,
             currencyId: 2,

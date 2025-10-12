@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
 using IkerFinance.Domain.Enums;
-using IkerFinance.Shared.DTOs.Transactions;
+using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactionSummary;
 
-public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionSummaryQuery, TransactionSummaryDto>
+public sealed class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionSummaryQuery, TransactionSummaryDto>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,71 +17,85 @@ public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionS
     }
 
     public async Task<TransactionSummaryDto> Handle(
-        GetTransactionSummaryQuery request, 
+        GetTransactionSummaryQuery request,
         CancellationToken cancellationToken)
     {
         var user = await _context.Users
-            .Include(u => u.HomeCurrency)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
         if (user?.HomeCurrencyId == null)
             throw new NotFoundException("User", request.UserId);
 
-        var query = _context.Transactions
-            .Include(t => t.Category)
+        var homeCurrency = await _context.Currencies
+            .FirstOrDefaultAsync(c => c.Id == user.HomeCurrencyId.Value, cancellationToken);
+
+        var transactionsQuery = _context.Transactions
             .Where(t => t.UserId == request.UserId);
 
         if (request.StartDate.HasValue)
         {
             var startDateUtc = DateTime.SpecifyKind(request.StartDate.Value.Date, DateTimeKind.Utc);
-            query = query.Where(t => t.Date >= startDateUtc);
+            transactionsQuery = transactionsQuery.Where(t => t.Date >= startDateUtc);
         }
 
         if (request.EndDate.HasValue)
         {
             var endDateUtc = DateTime.SpecifyKind(request.EndDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-            query = query.Where(t => t.Date <= endDateUtc);
+            transactionsQuery = transactionsQuery.Where(t => t.Date <= endDateUtc);
         }
 
-        var transactions = await query.ToListAsync(cancellationToken);
+        var transactionList = await transactionsQuery.ToListAsync(cancellationToken);
 
-        var totalIncome = transactions
+        var categoryIds = transactionList.Select(t => t.CategoryId).Distinct().ToList();
+        var categories = await _context.Categories
+            .Where(c => categoryIds.Contains(c.Id))
+            .ToListAsync(cancellationToken);
+
+        var totalIncome = transactionList
             .Where(t => t.Type == TransactionType.Income)
             .Sum(t => t.ConvertedAmount);
 
-        var totalExpenses = transactions
+        var totalExpenses = transactionList
             .Where(t => t.Type == TransactionType.Expense)
             .Sum(t => t.ConvertedAmount);
 
-        var topIncomeCategories = transactions
+        var topIncomeCategories = transactionList
             .Where(t => t.Type == TransactionType.Income)
-            .GroupBy(t => new { t.CategoryId, t.Category.Name, t.Category.Color, t.Category.Icon })
-            .Select(g => new CategorySummary
+            .GroupBy(t => t.CategoryId)
+            .Select(g =>
             {
-                CategoryId = g.Key.CategoryId,
-                CategoryName = g.Key.Name,
-                CategoryColor = g.Key.Color,
-                CategoryIcon = g.Key.Icon,
-                TotalAmount = g.Sum(t => t.ConvertedAmount),
-                TransactionCount = g.Count(),
-                Percentage = totalIncome > 0 ? (g.Sum(t => t.ConvertedAmount) / totalIncome) * 100 : 0
+                var category = categories.First(c => c.Id == g.Key);
+                return new CategorySummary
+                {
+                    CategoryId = g.Key,
+                    CategoryName = category.Name,
+                    CategoryColor = category.Color,
+                    CategoryIcon = category.Icon,
+                    TotalAmount = g.Sum(t => t.ConvertedAmount),
+                    TransactionCount = g.Count(),
+                    Percentage = totalIncome > 0 ? (g.Sum(t => t.ConvertedAmount) / totalIncome) * 100 : 0
+                };
             })
             .OrderByDescending(c => c.TotalAmount)
             .Take(5)
             .ToList();
 
-        var topExpenseCategories = transactions
+        var topExpenseCategories = transactionList
             .Where(t => t.Type == TransactionType.Expense)
-            .GroupBy(t => new { t.CategoryId, t.Category.Name, t.Category.Color, t.Category.Icon })
-            .Select(g => new CategorySummary
+            .GroupBy(t => t.CategoryId)
+            .Select(g =>
             {
-                CategoryId = g.Key.CategoryId,
-                CategoryName = g.Key.Name,
-                CategoryColor = g.Key.Color,
-                CategoryIcon = g.Key.Icon,
-                TotalAmount = g.Sum(t => t.ConvertedAmount),
-                TransactionCount = g.Count(),
-                Percentage = totalExpenses > 0 ? (g.Sum(t => t.ConvertedAmount) / totalExpenses) * 100 : 0
+                var category = categories.First(c => c.Id == g.Key);
+                return new CategorySummary
+                {
+                    CategoryId = g.Key,
+                    CategoryName = category.Name,
+                    CategoryColor = category.Color,
+                    CategoryIcon = category.Icon,
+                    TotalAmount = g.Sum(t => t.ConvertedAmount),
+                    TransactionCount = g.Count(),
+                    Percentage = totalExpenses > 0 ? (g.Sum(t => t.ConvertedAmount) / totalExpenses) * 100 : 0
+                };
             })
             .OrderByDescending(c => c.TotalAmount)
             .Take(5)
@@ -92,10 +106,10 @@ public class GetTransactionSummaryQueryHandler : IRequestHandler<GetTransactionS
             TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
             NetAmount = totalIncome - totalExpenses,
-            TotalTransactions = transactions.Count,
+            TotalTransactions = transactionList.Count,
             HomeCurrencyId = user.HomeCurrencyId.Value,
-            HomeCurrencyCode = user.HomeCurrency!.Code,
-            HomeCurrencySymbol = user.HomeCurrency.Symbol,
+            HomeCurrencyCode = homeCurrency!.Code,
+            HomeCurrencySymbol = homeCurrency.Symbol,
             TopIncomeCategories = topIncomeCategories,
             TopExpenseCategories = topExpenseCategories,
             StartDate = request.StartDate,
