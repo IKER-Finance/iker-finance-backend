@@ -14,26 +14,6 @@ public class BudgetServiceTests
         _budgetService = new BudgetService();
     }
 
-    // Test: Daily budget period adds 1 day to start date
-    [Fact]
-    public void Create_WithDailyPeriod_CalculatesEndDateCorrectly()
-    {
-        var startDate = new DateTime(2025, 1, 1);
-
-        var result = _budgetService.Create(
-            userId: "user123",
-            categoryId: 1,
-            currencyId: 1,
-            amount: 100m,
-            period: BudgetPeriod.Daily,
-            startDate: startDate,
-            description: "Test"
-        );
-
-        result.StartDate.Should().Be(startDate);
-        result.EndDate.Should().Be(new DateTime(2025, 1, 1, 23, 59, 59));
-    }
-
     // Test: Weekly budget period adds 7 days to start date
     [Fact]
     public void Create_WithWeeklyPeriod_CalculatesEndDateCorrectly()

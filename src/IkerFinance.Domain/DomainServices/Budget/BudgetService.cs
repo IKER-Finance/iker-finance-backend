@@ -82,7 +82,6 @@ public class BudgetService
     {
         return period switch
         {
-            BudgetPeriod.Daily => startDate.AddDays(1).AddSeconds(-1),
             BudgetPeriod.Weekly => startDate.AddDays(7).AddSeconds(-1),
             BudgetPeriod.Monthly => startDate.AddMonths(1).AddSeconds(-1),
             BudgetPeriod.Quarterly => startDate.AddMonths(3).AddSeconds(-1),
