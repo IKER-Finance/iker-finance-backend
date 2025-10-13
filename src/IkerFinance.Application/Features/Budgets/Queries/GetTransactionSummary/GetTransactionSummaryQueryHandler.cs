@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IkerFinance.Application.Common.Interfaces;
 using IkerFinance.Application.Common.Exceptions;
-using IkerFinance.Domain.Enums;
 using IkerFinance.Application.DTOs.Transactions;
 
 namespace IkerFinance.Application.Features.Transactions.Queries.GetTransactionSummary;
@@ -51,37 +50,9 @@ public sealed class GetTransactionSummaryQueryHandler : IRequestHandler<GetTrans
             .Where(c => categoryIds.Contains(c.Id))
             .ToListAsync(cancellationToken);
 
-        var totalIncome = transactionList
-            .Where(t => t.Type == TransactionType.Income)
-            .Sum(t => t.ConvertedAmount);
-
-        var totalExpenses = transactionList
-            .Where(t => t.Type == TransactionType.Expense)
-            .Sum(t => t.ConvertedAmount);
-
-        var topIncomeCategories = transactionList
-            .Where(t => t.Type == TransactionType.Income)
-            .GroupBy(t => t.CategoryId)
-            .Select(g =>
-            {
-                var category = categories.First(c => c.Id == g.Key);
-                return new CategorySummary
-                {
-                    CategoryId = g.Key,
-                    CategoryName = category.Name,
-                    CategoryColor = category.Color,
-                    CategoryIcon = category.Icon,
-                    TotalAmount = g.Sum(t => t.ConvertedAmount),
-                    TransactionCount = g.Count(),
-                    Percentage = totalIncome > 0 ? (g.Sum(t => t.ConvertedAmount) / totalIncome) * 100 : 0
-                };
-            })
-            .OrderByDescending(c => c.TotalAmount)
-            .Take(5)
-            .ToList();
+        var totalExpenses = transactionList.Sum(t => t.ConvertedAmount);
 
         var topExpenseCategories = transactionList
-            .Where(t => t.Type == TransactionType.Expense)
             .GroupBy(t => t.CategoryId)
             .Select(g =>
             {
@@ -103,14 +74,11 @@ public sealed class GetTransactionSummaryQueryHandler : IRequestHandler<GetTrans
 
         return new TransactionSummaryDto
         {
-            TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
-            NetAmount = totalIncome - totalExpenses,
             TotalTransactions = transactionList.Count,
             HomeCurrencyId = user.HomeCurrencyId.Value,
             HomeCurrencyCode = homeCurrency!.Code,
             HomeCurrencySymbol = homeCurrency.Symbol,
-            TopIncomeCategories = topIncomeCategories,
             TopExpenseCategories = topExpenseCategories,
             StartDate = request.StartDate,
             EndDate = request.EndDate
