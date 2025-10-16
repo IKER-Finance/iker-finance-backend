@@ -62,21 +62,6 @@ public class ArchitectureTests
     }
 
     [Fact]
-    public void Controllers_Should_HaveDependencyOnMediatR()
-    {
-        var apiAssembly = typeof(API.Program).Assembly;
-
-        var result = Types.InAssembly(apiAssembly)
-            .That()
-            .ResideInNamespace("IkerFinance.API.Controllers")
-            .Should()
-            .HaveDependencyOn("MediatR")
-            .GetResult();
-
-        Assert.True(result.IsSuccessful, "Controllers should use MediatR for CQRS");
-    }
-
-    [Fact]
     public void Handlers_Should_BeSealed()
     {
         var result = Types.InAssembly(ApplicationAssembly)

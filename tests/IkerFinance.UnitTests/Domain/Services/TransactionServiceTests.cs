@@ -223,7 +223,7 @@ public class TransactionServiceTests
             currencyId: 2,
             homeCurrencyId: 1,
             categoryId: 5,
-            type: TransactionType.Income,
+            type: TransactionType.Expense,
             description: "Updated",
             notes: null,
             date: DateTime.UtcNow,
@@ -234,7 +234,7 @@ public class TransactionServiceTests
         transaction.ConvertedAmount.Should().Be(750m);
         transaction.ExchangeRate.Should().Be(15.0m);
         transaction.CurrencyId.Should().Be(2);
-        transaction.Type.Should().Be(TransactionType.Income);
+        transaction.Type.Should().Be(TransactionType.Expense);
     }
 
     // Test: Updating to cross-currency without exchange rate throws exception

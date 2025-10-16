@@ -28,26 +28,26 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (app.Environment.EnvironmentName != "Testing")
 {
-    var serviceProvider = scope.ServiceProvider;
-    
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-        await context.Database.MigrateAsync();
-        await DataSeeder.SeedAsync(serviceProvider);
-    }
-    catch (Exception ex)
-    {
-        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating/seeding the database.");
+        var serviceProvider = scope.ServiceProvider;
+
+        try
+        {
+            var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+            await context.Database.MigrateAsync();
+            await DataSeeder.SeedAsync(serviceProvider);
+        }
+        catch (Exception ex)
+        {
+            var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while migrating/seeding the database.");
+        }
     }
 }
 
-app.Run();
+await app.RunAsync();
 
-namespace IkerFinance.API
-{
-    public partial class Program { }
-}
+public partial class Program { }
