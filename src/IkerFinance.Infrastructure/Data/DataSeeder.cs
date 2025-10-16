@@ -63,7 +63,7 @@ public static class DataSeeder
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        string[] roleNames = { "SystemAdmin", "MultiCurrencyUser" };
+        string[] roleNames = { "Admin", "User" };
 
         foreach (var roleName in roleNames)
         {
@@ -99,7 +99,7 @@ public static class DataSeeder
         var result = await userManager.CreateAsync(adminUser, "Admin@123456");
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(adminUser, "SystemAdmin");
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }

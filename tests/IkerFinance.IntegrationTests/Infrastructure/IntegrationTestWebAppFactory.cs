@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,18 +36,29 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
         using (var scope = host.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             db.Database.EnsureDeleted();
             db.Database.EnsureCreated();
 
-            SeedTestData(db);
+            SeedTestData(db, roleManager).Wait();
         }
 
         return host;
     }
 
-    private static void SeedTestData(ApplicationDbContext context)
+    private static async Task SeedTestData(ApplicationDbContext context, RoleManager<IdentityRole> roleManager)
     {
+        // Seed roles
+        string[] roleNames = { "Admin", "User" };
+        foreach (var roleName in roleNames)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+
         var currencies = new List<Currency>
         {
             new() { Code = "USD", Name = "US Dollar", Symbol = "$", DecimalPlaces = 2 },

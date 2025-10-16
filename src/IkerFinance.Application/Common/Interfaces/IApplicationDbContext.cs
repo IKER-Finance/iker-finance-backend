@@ -11,6 +11,7 @@ public interface IApplicationDbContext
     IQueryable<Category> Categories { get; }
     IQueryable<Transaction> Transactions { get; }
     IQueryable<Budget> Budgets { get; }
+    IQueryable<Feedback> Feedbacks { get; }
 
     void Add<T>(T entity) where T : class;
     void Remove<T>(T entity) where T : class;

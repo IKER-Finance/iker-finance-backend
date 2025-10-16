@@ -39,8 +39,11 @@ public class RegisterCommandHandlerTests
         _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), command.Password))
             .ReturnsAsync(IdentityResult.Success);
 
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
         _mockTokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>()))
-            .Returns(expectedToken);
+            .ReturnsAsync(expectedToken);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -71,8 +74,11 @@ public class RegisterCommandHandlerTests
             .Callback<ApplicationUser, string>((user, _) => capturedUser = user)
             .ReturnsAsync(IdentityResult.Success);
 
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
         _mockTokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>()))
-            .Returns("token");
+            .ReturnsAsync("token");
 
         await _handler.Handle(command, CancellationToken.None);
 
@@ -160,9 +166,12 @@ public class RegisterCommandHandlerTests
         _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), command.Password))
             .ReturnsAsync(IdentityResult.Success);
 
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
         _mockTokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>()))
             .Callback<ApplicationUser>(user => tokenUser = user)
-            .Returns("token");
+            .ReturnsAsync("token");
 
         await _handler.Handle(command, CancellationToken.None);
 
@@ -187,8 +196,11 @@ public class RegisterCommandHandlerTests
         _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), command.Password))
             .ReturnsAsync(IdentityResult.Success);
 
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
         _mockTokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>()))
-            .Returns("token");
+            .ReturnsAsync("token");
 
         var result = await _handler.Handle(command, CancellationToken.None);
 

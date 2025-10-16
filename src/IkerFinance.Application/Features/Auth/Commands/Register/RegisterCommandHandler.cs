@@ -40,7 +40,10 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, Au
             throw new ApplicationException($"Registration failed: {errors}");
         }
 
-        var token = _tokenService.GenerateToken(user);
+        // Assign default role to new users
+        await _userManager.AddToRoleAsync(user, "User");
+
+        var token = await _tokenService.GenerateToken(user);
 
         return new AuthResponse(
             Token: token,

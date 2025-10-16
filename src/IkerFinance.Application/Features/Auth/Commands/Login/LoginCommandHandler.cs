@@ -39,7 +39,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         user.LastLoginDate = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
-        var token = _tokenService.GenerateToken(user);
+        var token = await _tokenService.GenerateToken(user);
 
         return new AuthResponse(
             Token: token,

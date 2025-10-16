@@ -4,6 +4,6 @@ namespace IkerFinance.Application.Common.Interfaces;
 
 public interface ITokenService
 {
-    string GenerateToken(ApplicationUser user);
+    Task<string> GenerateToken(ApplicationUser user);
     string? ValidateToken(string token);
 }

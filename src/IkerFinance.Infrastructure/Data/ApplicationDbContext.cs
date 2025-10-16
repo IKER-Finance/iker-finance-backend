@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public IQueryable<Category> Categories => Set<Category>();
     public IQueryable<Transaction> Transactions => Set<Transaction>();
     public IQueryable<Budget> Budgets => Set<Budget>();
+    public IQueryable<Feedback> Feedbacks => Set<Feedback>();
 
     public new void Add<T>(T entity) where T : class => Set<T>().Add(entity);
     public new void Remove<T>(T entity) where T : class => Set<T>().Remove(entity);
@@ -156,6 +157,31 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
             entity.HasIndex(e => new { e.UserId, e.StartDate, e.EndDate });
             entity.HasIndex(e => new { e.UserId, e.CategoryId, e.Period, e.IsActive })
                 .HasFilter("\"IsActive\" = true");
+        });
+
+        builder.Entity<Feedback>(entity =>
+        {
+            entity.ToTable("Feedbacks");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Subject).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(2000).IsRequired();
+            entity.Property(e => e.AdminResponse).HasMaxLength(2000);
+
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(e => e.RespondedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 }

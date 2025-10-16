@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
+        services.AddScoped<IFeedbackRepository, FeedbackRepository>();
 
         return services;
     }
