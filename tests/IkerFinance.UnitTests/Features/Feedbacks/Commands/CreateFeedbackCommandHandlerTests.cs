@@ -21,7 +21,7 @@ public class CreateFeedbackCommandHandlerTests
         _handler = new CreateFeedbackCommandHandler(_mockContext.Object);
     }
 
-    // ✅ Test 1: 用户存在时成功创建反馈
+    // Test 1: Creates feedback successfully when user exists
     [Fact]
     public async Task Handle_WithValidUser_CreatesFeedbackSuccessfully()
     {
@@ -50,7 +50,7 @@ public class CreateFeedbackCommandHandlerTests
         result.Status.Should().Be(FeedbackStatus.Open);
     }
 
-    // ✅ Test 2: 用户不存在时应抛出 NotFoundException
+    // Test 2: Should throw NotFoundException when user not found
     [Fact]
     public async Task Handle_WhenUserNotFound_ShouldThrowNotFoundException()
     {
@@ -68,7 +68,7 @@ public class CreateFeedbackCommandHandlerTests
         await act.Should().ThrowAsync<NotFoundException>().WithMessage("*User*");
     }
 
-    // ✅ Test 3: 验证创建的 Feedback 属性是否正确
+    // Test 3: Verifies that feedback properties are set correctly
     [Fact]
     public async Task Handle_ShouldSetFeedbackPropertiesCorrectly()
     {
@@ -98,7 +98,7 @@ public class CreateFeedbackCommandHandlerTests
         capturedFeedback.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
-    // ✅ Test 4: 验证 Add() 和 SaveChangesAsync 被正确调用一次
+    // Test 4: Verifies that Add() and SaveChangesAsync are called once
     [Fact]
     public async Task Handle_ShouldCallAddAndSaveOnce()
     {

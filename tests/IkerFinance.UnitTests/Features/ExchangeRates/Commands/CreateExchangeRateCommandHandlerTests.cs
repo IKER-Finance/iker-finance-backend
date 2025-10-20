@@ -20,7 +20,7 @@ public class CreateExchangeRateCommandHandlerTests
         _handler = new CreateExchangeRateCommandHandler(_mockContext.Object);
     }
 
-    // ✅ Test 1: 成功创建汇率记录
+    // Test 1: Successfully creates exchange rate record
     [Fact]
     public async Task Handle_WithValidData_CreatesExchangeRateSuccessfully()
     {
@@ -63,7 +63,7 @@ public class CreateExchangeRateCommandHandlerTests
         _mockContext.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    // ✅ Test 2: 找不到 AdminUser 抛出 NotFoundException
+    // Test 2: Throws NotFoundException when AdminUser not found
     [Fact]
     public async Task Handle_WhenAdminUserNotFound_ShouldThrowNotFoundException()
     {
@@ -90,7 +90,7 @@ public class CreateExchangeRateCommandHandlerTests
         await act.Should().ThrowAsync<NotFoundException>().WithMessage("*Admin User*");
     }
 
-    // ✅ Test 3: 找不到 FromCurrency 抛出 NotFoundException
+    // Test 3: Throws NotFoundException when FromCurrency not found
     [Fact]
     public async Task Handle_WhenFromCurrencyNotFound_ShouldThrowNotFoundException()
     {
@@ -114,7 +114,7 @@ public class CreateExchangeRateCommandHandlerTests
         await act.Should().ThrowAsync<NotFoundException>().WithMessage("*From Currency*");
     }
 
-    // ✅ Test 4: 找不到 ToCurrency 抛出 NotFoundException
+    // Test 4: Throws NotFoundException when ToCurrency not found
     [Fact]
     public async Task Handle_WhenToCurrencyNotFound_ShouldThrowNotFoundException()
     {
@@ -138,7 +138,7 @@ public class CreateExchangeRateCommandHandlerTests
         await act.Should().ThrowAsync<NotFoundException>().WithMessage("*To Currency*");
     }
 
-    // ✅ Test 5: ExchangeRate 属性设置正确
+    // Test 5: Sets ExchangeRate properties correctly
     [Fact]
     public async Task Handle_ShouldSetExchangeRatePropertiesCorrectly()
     {
