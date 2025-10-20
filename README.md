@@ -26,17 +26,19 @@ Password: Test@123456
 
 ## Overview
 
-IKER Finance provides a RESTful API for managing multi-currency personal finances, targeting immigrants, foreign students, expatriates, and international travelers.
+IKER Finance provides a RESTful API for managing multi-currency personal finances, targeting immigrants, foreign students, expatriates, and international travelers who need to track spending across different currencies while maintaining a single home currency for budgeting and reporting.
 
 **Core Features**
 
-- **Multi-Currency Support** - Track transactions in any active currency with automatic conversion to your home currency
-- **Smart Budget Management** - Period-based budgets (daily/weekly/monthly/quarterly/yearly) with category-level tracking
-- **Customizable Categories** - Use default categories or create custom ones tailored to your spending patterns
+- **Multi-Currency Support** - Track transactions in any active currency with automatic conversion to your home currency (set during registration)
+- **Smart Budget Management** - Category-based budgets with flexible periods (weekly/monthly/quarterly/yearly) and automatic alert thresholds (80% warning, 100% critical)
+- **Predefined Categories** - System-defined categories (Food, Transport, Shopping, Bills, Entertainment, and others) for organizing transactions and budgets
 - **Historical Accuracy** - Exchange rates captured at transaction time, preserving accurate historical values
-- **Real-Time Dashboard** - Spending summaries and budget status calculated on-demand
-- **Data Export** - Export transaction history as CSV, PDF, or Excel files
-- **Secure Authentication** - JWT-based authentication with role-based access control
+- **Financial Overview Dashboard** - Transaction summaries, budget status tracking, recent transactions, and active budgets all in home currency
+- **User Profile & Settings** - Manage personal information, change password, configure default transaction currency and timezone
+- **Feedback System** - Submit feedback (bugs, features, improvements) with priority levels and admin status tracking
+- **Admin Exchange Rate Management** - Admin-only CRUD operations for managing currency exchange rates
+- **Secure Authentication** - JWT-based authentication with role-based access control (User/Admin roles)
 
 ## Architecture
 
@@ -207,11 +209,14 @@ Authorization: Bearer {your-jwt-token}
 
 ### Available Resources
 
-- **Authentication** - User registration and login
-- **Transactions** - Multi-currency transaction management
-- **Budgets** - Budget creation and tracking
-- **Categories** - Expense/income categorization
-- **Currencies** - Currency and exchange rate information
+- **Authentication** (`/api/auth`) - User registration with home currency selection and login with JWT token
+- **Transactions** (`/api/transactions`) - Multi-currency transaction CRUD operations with category and currency selection, filtering, and summary views
+- **Budgets** (`/api/budgets`) - Category-based budget CRUD operations with period selection, spending tracking, active budget listing, and impact preview
+- **Categories** (`/api/categories`) - View predefined system categories for organizing transactions and budgets
+- **Currencies** (`/api/currencies`) - View all available active currencies for transaction and budget management
+- **Users** (`/api/users`) - Profile management (name updates), settings configuration (currencies, timezone), and password changes
+- **Feedback** (`/api/feedback`) - User feedback submission with type and priority selection; admin feedback management with status updates
+- **Exchange Rates** (`/api/exchange-rates`) - Admin-only CRUD operations for managing currency conversion rates with effective dates
 
 Refer to Swagger documentation for detailed endpoint specifications and request/response schemas.
 
