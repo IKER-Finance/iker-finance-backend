@@ -28,4 +28,8 @@
     <ProjectReference Include="..\..\src\IkerFinance.Domain\IkerFinance.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\ExchangeRates\" />
+  </ItemGroup>
+
 </Project>
