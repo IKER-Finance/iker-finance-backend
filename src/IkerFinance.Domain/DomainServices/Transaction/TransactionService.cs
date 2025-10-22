@@ -4,15 +4,8 @@ using TransactionEntity = IkerFinance.Domain.Entities.Transaction;
 
 namespace IkerFinance.Domain.DomainServices.Transaction;
 
-/// <summary>
-/// Domain service responsible for Transaction entity lifecycle.
-/// Handles creation, updates, and currency conversion.
-/// </summary>
 public class TransactionService
 {
-    /// <summary>
-    /// Creates a new Transaction with currency conversion applied.
-    /// </summary>
     public TransactionEntity Create(
         string userId,
         decimal amount,
@@ -45,9 +38,6 @@ public class TransactionService
         return transaction;
     }
 
-    /// <summary>
-    /// Updates an existing transaction with new values and recalculates currency conversion.
-    /// </summary>
     public void Update(
         TransactionEntity transaction,
         decimal amount,
@@ -76,16 +66,11 @@ public class TransactionService
         ApplyCurrencyConversion(transaction, homeCurrencyId, exchangeRate);
     }
 
-    /// <summary>
-    /// Applies currency conversion to a transaction.
-    /// If same currency, sets 1:1 conversion. Otherwise uses provided exchange rate.
-    /// </summary>
     private void ApplyCurrencyConversion(
         TransactionEntity transaction,
         int homeCurrencyId,
         ExchangeRate? exchangeRate)
     {
-        // Same currency - no conversion needed
         if (transaction.CurrencyId == homeCurrencyId)
         {
             transaction.ConvertedAmount = transaction.Amount;
@@ -94,7 +79,6 @@ public class TransactionService
             return;
         }
 
-        // Cross-currency transaction - exchange rate required
         if (exchangeRate == null)
         {
             throw new InvalidOperationException(

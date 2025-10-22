@@ -2,18 +2,14 @@ namespace IkerFinance.Application.Features.Budgets.Queries.GetActiveBudgets;
 
 public class ActiveBudgetsSummaryDto
 {
-    // Overall Statistics (in home currency)
     public int TotalBudgets { get; set; }
-    public decimal TotalBudgetedAmount { get; set; } // Converted to home currency
-    public decimal TotalSpentAmount { get; set; } // In home currency
+    public decimal TotalBudgetedAmount { get; set; }
+    public decimal TotalSpentAmount { get; set; }
     public int BudgetsOnTrack { get; set; }
     public int BudgetsWarning { get; set; }
     public int BudgetsOverBudget { get; set; }
-
     public string HomeCurrencyCode { get; set; } = string.Empty;
     public string HomeCurrencySymbol { get; set; } = string.Empty;
-
-    // Individual Budget Summaries
     public List<ActiveBudgetItemDto> Budgets { get; set; } = new();
 }
 

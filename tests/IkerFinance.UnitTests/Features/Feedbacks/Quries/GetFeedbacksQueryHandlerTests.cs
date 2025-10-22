@@ -23,7 +23,6 @@ public class GetFeedbacksQueryHandlerTests
     [Fact]
     public async Task Handle_WithValidQuery_ShouldReturnExpectedData()
     {
-        // Arrange
         var query = new GetFeedbacksQuery
         {
             Type = FeedbackType.Bug,
@@ -55,10 +54,8 @@ public class GetFeedbacksQueryHandlerTests
             .Setup(x => x.GetFeedbacksAsync(It.IsAny<FeedbackFilters>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.TotalCount.Should().Be(1);
         result.PageNumber.Should().Be(1);
@@ -72,7 +69,6 @@ public class GetFeedbacksQueryHandlerTests
     [Fact]
     public async Task Handle_WhenNoFeedbacks_ShouldReturnEmptyResult()
     {
-        // Arrange
         var query = new GetFeedbacksQuery { PageNumber = 1, PageSize = 10 };
 
         _mockRepo
@@ -85,10 +81,8 @@ public class GetFeedbacksQueryHandlerTests
                 Data = new List<FeedbackDto>()
             });
 
-        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
         result.TotalCount.Should().Be(0);
         result.Data.Should().BeEmpty();
         result.HasNextPage.Should().BeFalse();
@@ -99,7 +93,6 @@ public class GetFeedbacksQueryHandlerTests
     [Fact]
     public async Task Handle_ShouldPassCorrectFiltersToRepository()
     {
-        // Arrange
         FeedbackFilters? capturedFilters = null;
 
         _mockRepo
@@ -116,10 +109,8 @@ public class GetFeedbacksQueryHandlerTests
             PageSize = 5
         };
 
-        // Act
         await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
         capturedFilters.Should().NotBeNull();
         capturedFilters!.Type.Should().Be(FeedbackType.Improvement);
         capturedFilters.Status.Should().Be(FeedbackStatus.Resolved);

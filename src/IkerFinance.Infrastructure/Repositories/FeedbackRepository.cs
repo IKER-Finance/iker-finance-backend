@@ -50,7 +50,6 @@ public class FeedbackRepository : IFeedbackRepository
             query = query.Where(f => f.CreatedAt <= endDateUtc);
         }
 
-        // Sorting
         query = filters.SortBy.ToLower() switch
         {
             "createdat" => filters.SortOrder.ToLower() == "asc"

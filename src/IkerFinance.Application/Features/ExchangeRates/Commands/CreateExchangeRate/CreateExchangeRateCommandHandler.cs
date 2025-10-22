@@ -20,14 +20,12 @@ public sealed class CreateExchangeRateCommandHandler : IRequestHandler<CreateExc
         CreateExchangeRateCommand request,
         CancellationToken cancellationToken)
     {
-        // Verify admin user exists
         var adminUser = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == request.AdminUserId, cancellationToken);
 
         if (adminUser == null)
             throw new NotFoundException("Admin User", request.AdminUserId);
 
-        // Verify currencies exist
         var fromCurrency = await _context.Currencies
             .FirstOrDefaultAsync(c => c.Id == request.FromCurrencyId, cancellationToken);
 
@@ -40,7 +38,6 @@ public sealed class CreateExchangeRateCommandHandler : IRequestHandler<CreateExc
         if (toCurrency == null)
             throw new NotFoundException("To Currency", request.ToCurrencyId);
 
-        // Create exchange rate
         var exchangeRate = new ExchangeRate
         {
             FromCurrencyId = request.FromCurrencyId,
@@ -56,7 +53,6 @@ public sealed class CreateExchangeRateCommandHandler : IRequestHandler<CreateExc
         _context.Add(exchangeRate);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Return DTO
         return new ExchangeRateDto
         {
             Id = exchangeRate.Id,

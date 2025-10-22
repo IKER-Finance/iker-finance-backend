@@ -22,9 +22,6 @@ public class FeedbackController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Submit feedback (Any authenticated user)
-    /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateFeedback([FromBody] CreateFeedbackCommand command)
     {
@@ -37,11 +34,6 @@ public class FeedbackController : ControllerBase
         return CreatedAtAction(nameof(GetFeedbacks), new { id = result.Id }, result);
     }
 
-    /// <summary>
-    /// Get all feedbacks with pagination (Admin only)
-    /// NOTE: Currently allows all authenticated users. Implement role-based authorization for production.
-    /// To restrict to admin: Add [Authorize(Roles = "Admin")] when roles are implemented
-    /// </summary>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetFeedbacks([FromQuery] GetFeedbacksQuery query)
@@ -52,11 +44,6 @@ public class FeedbackController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Update feedback status (Admin only)
-    /// NOTE: Currently allows all authenticated users. Implement role-based authorization for production.
-    /// To restrict to admin: Add [Authorize(Roles = "Admin")] when roles are implemented
-    /// </summary>
     [HttpPatch("{id}/status")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFeedbackStatus(int id, [FromBody] UpdateFeedbackStatusCommand command)

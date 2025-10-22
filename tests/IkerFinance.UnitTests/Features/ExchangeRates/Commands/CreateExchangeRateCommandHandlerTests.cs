@@ -24,7 +24,6 @@ public class CreateExchangeRateCommandHandlerTests
     [Fact]
     public async Task Handle_WithValidData_CreatesExchangeRateSuccessfully()
     {
-        // Arrange
         var adminUser = new ApplicationUser { Id = "admin1", FirstName = "John", LastName = "Doe" };
         var fromCurrency = new Currency { Id = 1, Code = "USD", Name = "US Dollar" };
         var toCurrency = new Currency { Id = 2, Code = "EUR", Name = "Euro" };
@@ -49,10 +48,8 @@ public class CreateExchangeRateCommandHandlerTests
             IsActive = true
         };
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.Rate.Should().Be(1.25m);
         result.FromCurrencyCode.Should().Be("USD");

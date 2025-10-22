@@ -9,17 +9,10 @@ namespace IkerFinance.Domain;
 /// </summary>
 public static class DependencyInjection
 {
-    /// <summary>
-    /// Registers all domain services with the DI container.
-    /// All domain services are registered as Transient since they're stateless.
-    /// </summary>
     public static IServiceCollection AddDomain(this IServiceCollection services)
     {
-        // Budget domain services
         services.AddTransient<BudgetService>();
         services.AddTransient<BudgetCalculator>();
-
-        // Transaction domain services
         services.AddTransient<TransactionService>();
 
         return services;

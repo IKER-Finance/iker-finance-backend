@@ -23,9 +23,6 @@ public class UsersController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Get current user's profile
-    /// </summary>
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {
@@ -37,9 +34,6 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Update current user's profile (name)
-    /// </summary>
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserProfileCommand command)
     {
@@ -52,9 +46,6 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Change current user's password
-    /// </summary>
     [HttpPut("password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
     {
@@ -67,9 +58,6 @@ public class UsersController : ControllerBase
         return Ok(new { success = result, message = "Password changed successfully" });
     }
 
-    /// <summary>
-    /// Get current user's settings
-    /// </summary>
     [HttpGet("settings")]
     public async Task<IActionResult> GetSettings()
     {
@@ -81,15 +69,12 @@ public class UsersController : ControllerBase
 
         return Ok(new
         {
-            homeCurrencyId = profile.HomeCurrencyId, // Read-only
+            homeCurrencyId = profile.HomeCurrencyId,
             defaultTransactionCurrencyId = profile.DefaultTransactionCurrencyId,
             timeZone = profile.TimeZone
         });
     }
 
-    /// <summary>
-    /// Update current user's settings
-    /// </summary>
     [HttpPut("settings")]
     public async Task<IActionResult> UpdateSettings([FromBody] UpdateUserSettingsCommand command)
     {

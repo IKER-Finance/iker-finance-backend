@@ -27,7 +27,6 @@ public class GetExchangeRateByIdQueryHandlerTests
     [Fact]
     public async Task Handle_WithValidId_ShouldReturnExchangeRate()
     {
-        // Arrange
         var from = new Currency { Id = 1, Code = "USD", Name = "Dollar" };
         var to = new Currency { Id = 2, Code = "EUR", Name = "Euro" };
 
@@ -37,7 +36,7 @@ public class GetExchangeRateByIdQueryHandlerTests
             FromCurrencyId = 1,
             ToCurrencyId = 2,
             Rate = 1.15m,
-            FromCurrency = from,   // populate navigation to avoid NRE if handler projects it
+            FromCurrency = from,
             ToCurrency = to
         };
 
@@ -46,10 +45,8 @@ public class GetExchangeRateByIdQueryHandlerTests
 
         _mockContext.Setup(x => x.ExchangeRates).Returns(ratesDb.Object);
 
-        // Act
         var result = await _handler.Handle(new GetExchangeRateByIdQuery { Id = 1 }, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(1);
         result.Rate.Should().Be(1.15m);

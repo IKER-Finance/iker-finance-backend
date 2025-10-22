@@ -24,9 +24,6 @@ public class ExchangeRatesController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Get all exchange rates with pagination and filtering (Admin only)
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetExchangeRates([FromQuery] GetExchangeRatesQuery query)
     {
@@ -36,9 +33,6 @@ public class ExchangeRatesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Get exchange rate by ID (Admin only)
-    /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetExchangeRateById(int id)
     {
@@ -49,9 +43,6 @@ public class ExchangeRatesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Create new exchange rate (Admin only)
-    /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateExchangeRate([FromBody] CreateExchangeRateCommand command)
     {
@@ -65,9 +56,6 @@ public class ExchangeRatesController : ControllerBase
         return CreatedAtAction(nameof(GetExchangeRateById), new { id = result.Id }, result);
     }
 
-    /// <summary>
-    /// Update exchange rate (Admin only)
-    /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateExchangeRate(int id, [FromBody] UpdateExchangeRateCommand command)
     {
@@ -81,9 +69,6 @@ public class ExchangeRatesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Delete exchange rate (Admin only)
-    /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteExchangeRate(int id)
     {

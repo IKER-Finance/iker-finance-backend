@@ -21,7 +21,6 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
 
     public async Task<BudgetSummaryDto> Handle(GetBudgetSummaryQuery request, CancellationToken cancellationToken)
     {
-        // Fetch budget with includes
         var budget = await _context.Budgets
             .Include(b => b.Currency)
             .Include(b => b.Category)
@@ -60,12 +59,10 @@ public sealed class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSumm
             totalSpent += amountInBudgetCurrency;
         }
 
-        // Calculate basic metrics
         decimal remaining = budget.Amount - totalSpent;
         decimal percentageSpent = budget.Amount > 0 ? (totalSpent / budget.Amount) * 100 : 0;
         string status = DetermineStatus(percentageSpent);
 
-        // Build response
         return new BudgetSummaryDto
         {
             BudgetId = budget.Id,

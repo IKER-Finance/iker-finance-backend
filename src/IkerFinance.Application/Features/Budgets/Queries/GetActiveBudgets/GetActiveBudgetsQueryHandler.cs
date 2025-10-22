@@ -21,7 +21,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
 
     public async Task<ActiveBudgetsSummaryDto> Handle(GetActiveBudgetsQuery request, CancellationToken cancellationToken)
     {
-        // Get user and home currency
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
@@ -34,7 +33,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
         if (homeCurrency == null)
             throw new NotFoundException("Currency", user.HomeCurrencyId.Value);
 
-        // Get all active budgets for user (IsActive = true and current date within date range)
         var currentDate = DateTime.UtcNow;
         var activeBudgets = await _context.Budgets
             .Include(b => b.Currency)
@@ -45,7 +43,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
                 && b.EndDate >= currentDate)
             .ToListAsync(cancellationToken);
 
-        // Initialize counters
         int onTrackCount = 0;
         int warningCount = 0;
         int overBudgetCount = 0;
@@ -54,10 +51,8 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
 
         var budgetItems = new List<ActiveBudgetItemDto>();
 
-        // Process each budget
         foreach (var budget in activeBudgets)
         {
-            // Get transactions for this budget category in budget period
             var transactions = await _context.Transactions
                 .Include(t => t.ConvertedCurrency)
                 .Where(t => t.UserId == request.UserId
@@ -67,7 +62,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
                     && t.Date <= budget.EndDate)
                 .ToListAsync(cancellationToken);
 
-            // Calculate total spent in budget currency
             decimal spentInBudgetCurrency = 0;
             foreach (var transaction in transactions)
             {
@@ -83,12 +77,10 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
             decimal percentage = budget.Amount > 0 ? (spentInBudgetCurrency / budget.Amount) * 100 : 0;
             string status = DetermineStatus(percentage);
 
-            // Update counters
             if (status == "OnTrack") onTrackCount++;
             else if (status == "Warning") warningCount++;
             else if (status == "OverBudget") overBudgetCount++;
 
-            // Convert to home currency for totals
             decimal budgetAmountInHome = await _conversionService.ConvertAsync(
                 budget.Amount,
                 budget.CurrencyId,
@@ -102,7 +94,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
             totalBudgetedInHome += budgetAmountInHome;
             totalSpentInHome += spentAmountInHome;
 
-            // Build budget item
             var budgetItem = new ActiveBudgetItemDto
             {
                 Id = budget.Id,
@@ -124,7 +115,6 @@ public sealed class GetActiveBudgetsQueryHandler : IRequestHandler<GetActiveBudg
             budgetItems.Add(budgetItem);
         }
 
-        // Build response
         return new ActiveBudgetsSummaryDto
         {
             TotalBudgets = activeBudgets.Count,

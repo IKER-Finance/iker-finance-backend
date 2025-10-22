@@ -34,7 +34,6 @@ public class TokenService : ITokenService
             new("LastName", user.LastName)
         };
 
-        // Add role claims
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {

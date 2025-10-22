@@ -19,14 +19,12 @@ public sealed class UpdateExchangeRateCommandHandler : IRequestHandler<UpdateExc
         UpdateExchangeRateCommand request,
         CancellationToken cancellationToken)
     {
-        // Verify admin user exists
         var adminUser = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == request.AdminUserId, cancellationToken);
 
         if (adminUser == null)
             throw new NotFoundException("Admin User", request.AdminUserId);
 
-        // Get exchange rate with currencies
         var exchangeRate = await _context.ExchangeRates
             .Include(er => er.FromCurrency)
             .Include(er => er.ToCurrency)
@@ -35,7 +33,6 @@ public sealed class UpdateExchangeRateCommandHandler : IRequestHandler<UpdateExc
         if (exchangeRate == null)
             throw new NotFoundException("Exchange Rate", request.Id);
 
-        // Update fields
         exchangeRate.Rate = request.Rate;
         exchangeRate.EffectiveDate = DateTime.SpecifyKind(request.EffectiveDate, DateTimeKind.Utc);
         exchangeRate.IsActive = request.IsActive;
@@ -46,7 +43,6 @@ public sealed class UpdateExchangeRateCommandHandler : IRequestHandler<UpdateExc
         _context.Update(exchangeRate);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Return DTO
         return new ExchangeRateDto
         {
             Id = exchangeRate.Id,

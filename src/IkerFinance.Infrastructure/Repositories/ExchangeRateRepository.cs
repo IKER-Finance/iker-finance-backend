@@ -24,7 +24,6 @@ public class ExchangeRateRepository : IExchangeRateRepository
             .Include(er => er.ToCurrency)
             .AsQueryable();
 
-        // Search term filter - search in currency codes or names
         if (!string.IsNullOrWhiteSpace(filters.SearchTerm))
         {
             var searchTerm = filters.SearchTerm.ToLower();
@@ -35,18 +34,15 @@ public class ExchangeRateRepository : IExchangeRateRepository
                 er.ToCurrency.Name.ToLower().Contains(searchTerm));
         }
 
-        // Currency filters
         if (filters.FromCurrencyId.HasValue)
             query = query.Where(er => er.FromCurrencyId == filters.FromCurrencyId.Value);
 
         if (filters.ToCurrencyId.HasValue)
             query = query.Where(er => er.ToCurrencyId == filters.ToCurrencyId.Value);
 
-        // Active status filter
         if (filters.IsActive.HasValue)
             query = query.Where(er => er.IsActive == filters.IsActive.Value);
 
-        // Effective date range filters
         if (filters.EffectiveDateFrom.HasValue)
         {
             var effectiveDateFrom = DateTime.SpecifyKind(filters.EffectiveDateFrom.Value.Date, DateTimeKind.Utc);
@@ -59,7 +55,6 @@ public class ExchangeRateRepository : IExchangeRateRepository
             query = query.Where(er => er.EffectiveDate <= effectiveDateTo);
         }
 
-        // Sorting
         query = filters.SortBy.ToLower() switch
         {
             "effectivedate" => filters.SortOrder.ToLower() == "asc"
