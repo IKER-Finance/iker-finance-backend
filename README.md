@@ -12,9 +12,18 @@ Multi-currency personal finance management system built with Clean Architecture,
 [![xUnit](https://img.shields.io/badge/Tests-xUnit-red)](https://xunit.net/)
 [![Swagger](https://img.shields.io/badge/Docs-Swagger-85EA2D)](https://swagger.io/)
 
+## Demo
+
+A quick overview of IKER Finance.
+
+https://github.com/user-attachments/assets/780c68f7-77e3-413e-b0f8-28fade24626e
+
+
 ## Live Demo
 
 **API Documentation**: [https://iker-finance.onrender.com/swagger](https://iker-finance.onrender.com/swagger)
+
+**Live Application**: [https://iker-finance-site.onrender.com](https://iker-finance-site.onrender.com)
 
 ```
 Test Credentials
