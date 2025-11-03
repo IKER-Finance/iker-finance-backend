@@ -24,7 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IkerFinance.Domain\IkerFinance.Domain.csproj" />
     <ProjectReference Include="..\..\src\IkerFinance.Application\IkerFinance.Application.csproj" />
-    <ProjectReference Include="..\..\src\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\IkerFinance.Infrastructure.API\IkerFinance.Infrastructure.API.csproj" />
     <ProjectReference Include="..\..\src\IkerFinance.API\IkerFinance.API.csproj" />
   </ItemGroup>
 

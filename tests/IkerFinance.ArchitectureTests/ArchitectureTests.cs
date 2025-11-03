@@ -7,7 +7,7 @@ public class ArchitectureTests
 {
     private static readonly Assembly DomainAssembly = typeof(Domain.Common.BaseEntity).Assembly;
     private static readonly Assembly ApplicationAssembly = typeof(Application.Common.Interfaces.IApplicationDbContext).Assembly;
-    private static readonly Assembly InfrastructureAssembly = typeof(Infrastructure.Data.ApplicationDbContext).Assembly;
+    private static readonly Assembly InfrastructureAssembly = typeof(Infrastructure.API.Data.ApplicationDbContext).Assembly;
 
     [Fact]
     public void Domain_Should_Not_HaveDependencyOnOtherLayers()

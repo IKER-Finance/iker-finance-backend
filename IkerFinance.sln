@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IkerFinance.Domain", "src\I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IkerFinance.Application", "src\IkerFinance.Application\IkerFinance.Application.csproj", "{DFC2DB2C-FB79-4E6F-B5F3-69A7BBB50922}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IkerFinance.Infrastructure", "src\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj", "{61B34038-F967-4ABB-AD93-0ACB02B78FBB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IkerFinance.Infrastructure.API", "src\IkerFinance.Infrastructure.API\IkerFinance.Infrastructure.API.csproj", "{61B34038-F967-4ABB-AD93-0ACB02B78FBB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IkerFinance.API", "src\IkerFinance.API\IkerFinance.API.csproj", "{E6007E40-4862-4BE4-855C-76F321134FD8}"
 EndProject

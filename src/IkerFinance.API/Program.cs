@@ -2,8 +2,8 @@ using IkerFinance.API.Extensions;
 using IkerFinance.API.Middleware;
 using IkerFinance.Application;
 using IkerFinance.Domain;
-using IkerFinance.Infrastructure;
-using IkerFinance.Infrastructure.Data;
+using IkerFinance.Infrastructure.API;
+using IkerFinance.Infrastructure.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

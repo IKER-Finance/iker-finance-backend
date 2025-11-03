@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IkerFinance.Application\IkerFinance.Application.csproj" />
-    <ProjectReference Include="..\IkerFinance.Infrastructure\IkerFinance.Infrastructure.csproj" />
+    <ProjectReference Include="..\IkerFinance.Infrastructure.API\IkerFinance.Infrastructure.API.csproj" />
   </ItemGroup>
 
 </Project>
