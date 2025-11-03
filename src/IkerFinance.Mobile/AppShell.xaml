@@ -4,11 +4,20 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:IkerFinance.Mobile"
-    Title="IkerFinance.Mobile">
+    xmlns:views="clr-namespace:IkerFinance.Mobile.Views"
+    Title="IkerFinance"
+    FlyoutBehavior="Disabled">
 
+    <!-- Login Page (Initial) -->
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+    <!-- Main Page (After Login) -->
+    <ShellContent
+        Title="Dashboard"
+        ContentTemplate="{DataTemplate views:MainPage}"
         Route="MainPage" />
 
 </Shell>

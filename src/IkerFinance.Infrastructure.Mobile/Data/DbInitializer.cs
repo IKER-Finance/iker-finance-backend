@@ -35,16 +35,10 @@ public static class DbInitializer
         {
             new Currency { Code = "USD", Name = "US Dollar", Symbol = "$", DecimalPlaces = 2, IsActive = true },
             new Currency { Code = "EUR", Name = "Euro", Symbol = "€", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "GBP", Name = "British Pound", Symbol = "£", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "JPY", Name = "Japanese Yen", Symbol = "¥", DecimalPlaces = 0, IsActive = true },
-            new Currency { Code = "CNY", Name = "Chinese Yuan", Symbol = "¥", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "INR", Name = "Indian Rupee", Symbol = "₹", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "AUD", Name = "Australian Dollar", Symbol = "A$", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "CAD", Name = "Canadian Dollar", Symbol = "C$", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "CHF", Name = "Swiss Franc", Symbol = "CHF", DecimalPlaces = 2, IsActive = true },
             new Currency { Code = "SEK", Name = "Swedish Krona", Symbol = "kr", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "NOK", Name = "Norwegian Krone", Symbol = "kr", DecimalPlaces = 2, IsActive = true },
-            new Currency { Code = "DKK", Name = "Danish Krone", Symbol = "kr", DecimalPlaces = 2, IsActive = true },
+            new Currency { Code = "NGN", Name = "Nigerian Naira", Symbol = "₦", DecimalPlaces = 2, IsActive = true },
+            new Currency { Code = "BDT", Name = "Bangladeshi Taka", Symbol = "৳", DecimalPlaces = 2, IsActive = true },
+            new Currency { Code = "CNY", Name = "Chinese Yuan", Symbol = "¥", DecimalPlaces = 2, IsActive = true },
         };
 
         context.Set<Currency>().AddRange(currencies);
@@ -53,37 +47,23 @@ public static class DbInitializer
 
     private static async Task SeedExchangeRatesAsync(MobileDbContext context)
     {
-        // Get currency IDs after seeding
         var currencies = await context.Currencies.ToDictionaryAsync(c => c.Code, c => c.Id);
 
         var effectiveDate = DateTime.UtcNow.Date;
 
         var exchangeRates = new List<ExchangeRate>
         {
-            // USD as base
             new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["EUR"], Rate = 0.92m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["GBP"], Rate = 0.79m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["JPY"], Rate = 149.50m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["CNY"], Rate = 7.24m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["INR"], Rate = 83.20m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["AUD"], Rate = 1.53m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["CAD"], Rate = 1.36m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["CHF"], Rate = 0.88m, EffectiveDate = effectiveDate, IsActive = true },
             new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["SEK"], Rate = 10.85m, EffectiveDate = effectiveDate, IsActive = true },
+            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["NGN"], Rate = 1570.00m, EffectiveDate = effectiveDate, IsActive = true },
+            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["BDT"], Rate = 110.50m, EffectiveDate = effectiveDate, IsActive = true },
+            new ExchangeRate { FromCurrencyId = currencies["USD"], ToCurrencyId = currencies["CNY"], Rate = 7.24m, EffectiveDate = effectiveDate, IsActive = true },
 
-            // EUR as base
             new ExchangeRate { FromCurrencyId = currencies["EUR"], ToCurrencyId = currencies["USD"], Rate = 1.09m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["EUR"], ToCurrencyId = currencies["GBP"], Rate = 0.86m, EffectiveDate = effectiveDate, IsActive = true },
             new ExchangeRate { FromCurrencyId = currencies["EUR"], ToCurrencyId = currencies["SEK"], Rate = 11.80m, EffectiveDate = effectiveDate, IsActive = true },
 
-            // GBP as base
-            new ExchangeRate { FromCurrencyId = currencies["GBP"], ToCurrencyId = currencies["USD"], Rate = 1.27m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["GBP"], ToCurrencyId = currencies["EUR"], Rate = 1.16m, EffectiveDate = effectiveDate, IsActive = true },
-
-            // SEK as base (Swedish Krona - common for BTH students)
             new ExchangeRate { FromCurrencyId = currencies["SEK"], ToCurrencyId = currencies["USD"], Rate = 0.092m, EffectiveDate = effectiveDate, IsActive = true },
             new ExchangeRate { FromCurrencyId = currencies["SEK"], ToCurrencyId = currencies["EUR"], Rate = 0.085m, EffectiveDate = effectiveDate, IsActive = true },
-            new ExchangeRate { FromCurrencyId = currencies["SEK"], ToCurrencyId = currencies["GBP"], Rate = 0.073m, EffectiveDate = effectiveDate, IsActive = true },
         };
 
         context.Set<ExchangeRate>().AddRange(exchangeRates);

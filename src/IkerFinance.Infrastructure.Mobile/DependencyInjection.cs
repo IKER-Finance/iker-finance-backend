@@ -29,6 +29,7 @@ public static class DependencyInjection
 
         // Register Services
         services.AddScoped<ICurrencyConversionService, CurrencyConversionService>();
+        services.AddSingleton<IMobileAuthService, MobileAuthService>();
 
         return services;
     }
