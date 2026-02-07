@@ -41,6 +41,18 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
+	<!-- iOS Code Signing Configuration -->
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
+		<CodesignKey>Apple Development: asif.ahmed94@icloud.com (KGK4CTXQVW)</CodesignKey>
+		<CodesignProvision>iOS Team Provisioning Profile: com.companyname.ikerfinance.mobile</CodesignProvision>
+		<CodesignExtraArgs>--deep</CodesignExtraArgs>
+		<EnableCodeSigning>true</EnableCodeSigning>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">ios-arm64</RuntimeIdentifier>
+		<MtouchUseLlvm>true</MtouchUseLlvm>
+		<IpaPackageName>IkerFinance.Mobile</IpaPackageName>
+		<DevelopmentTeam>LGQG383UV5</DevelopmentTeam>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />

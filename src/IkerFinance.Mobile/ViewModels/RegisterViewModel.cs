@@ -108,7 +108,7 @@ public partial class RegisterViewModel : BaseViewModel
                 return;
             }
 
-            await Shell.Current.GoToAsync("//MainPage");
+            await Shell.Current.GoToAsync("//MainTabs");
         }
         catch (Exception ex)
         {

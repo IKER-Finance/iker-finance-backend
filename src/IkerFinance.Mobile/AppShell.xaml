@@ -6,18 +6,50 @@
     xmlns:local="clr-namespace:IkerFinance.Mobile"
     xmlns:views="clr-namespace:IkerFinance.Mobile.Views"
     Title="IkerFinance"
-    FlyoutBehavior="Disabled">
+    Shell.FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="True"
+    Shell.TabBarIsVisible="True">
 
-    <!-- Login Page (Initial) -->
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#3b82f6</Color>
+            <Color x:Key="PrimaryDark">#2563eb</Color>
+            <Color x:Key="Gray200">#e5e7eb</Color>
+            <Color x:Key="Gray600">#475569</Color>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <!-- Tab Bar Styling -->
+    <Shell.TabBarBackgroundColor>White</Shell.TabBarBackgroundColor>
+    <Shell.TabBarTitleColor>#475569</Shell.TabBarTitleColor>
+    <Shell.TabBarUnselectedColor>#9ca3af</Shell.TabBarUnselectedColor>
+    <Shell.TabBarForegroundColor>#3b82f6</Shell.TabBarForegroundColor>
+
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate views:LoginPage}"
         Route="LoginPage" />
 
-    <!-- Main Page (After Login) -->
-    <ShellContent
-        Title="Dashboard"
-        ContentTemplate="{DataTemplate views:MainPage}"
-        Route="MainPage" />
+    <TabBar Route="MainTabs">
+        <ShellContent
+            Title="Dashboard"
+            ContentTemplate="{DataTemplate views:DashboardPage}"
+            Route="DashboardPage" />
+
+        <ShellContent
+            Title="Transactions"
+            ContentTemplate="{DataTemplate views:TransactionsPage}"
+            Route="TransactionsPage" />
+
+        <ShellContent
+            Title="Budgets"
+            ContentTemplate="{DataTemplate views:BudgetsPage}"
+            Route="BudgetsPage" />
+
+        <ShellContent
+            Title="Profile"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
+            Route="ProfilePage" />
+    </TabBar>
 
 </Shell>

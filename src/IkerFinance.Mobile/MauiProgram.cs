@@ -35,11 +35,21 @@ public static class MauiProgram
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<RegisterViewModel>();
 		builder.Services.AddTransient<MainViewModel>();
+		builder.Services.AddTransient<DashboardViewModel>();
+		builder.Services.AddTransient<TransactionsViewModel>();
+		builder.Services.AddTransient<AddTransactionViewModel>();
+		builder.Services.AddTransient<BudgetsViewModel>();
+		builder.Services.AddTransient<ProfileViewModel>();
 
 		builder.Services.AddTransient<TestPage>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<RegisterPage>();
 		builder.Services.AddTransient<MainPage>();
+		builder.Services.AddTransient<DashboardPage>();
+		builder.Services.AddTransient<TransactionsPage>();
+		builder.Services.AddTransient<AddTransactionPage>();
+		builder.Services.AddTransient<BudgetsPage>();
+		builder.Services.AddTransient<ProfilePage>();
 
 		var app = builder.Build();
 

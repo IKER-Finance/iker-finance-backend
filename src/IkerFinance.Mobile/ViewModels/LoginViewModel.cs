@@ -19,6 +19,7 @@ public partial class LoginViewModel : BaseViewModel
 
     public LoginViewModel(IMobileAuthService authService)
     {
+        Console.WriteLine("=== LoginViewModel constructor called ===");
         _authService = authService;
         Title = "Login";
     }
@@ -26,12 +27,14 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private async Task LoginAsync()
     {
+        Console.WriteLine("=== LoginAsync called ===");
         if (IsBusy) return;
 
         try
         {
             IsBusy = true;
             ClearError();
+            Console.WriteLine($"Attempting login with email: {Email}");
 
             // Validate inputs
             if (string.IsNullOrWhiteSpace(Email))
@@ -55,7 +58,7 @@ public partial class LoginViewModel : BaseViewModel
                 return;
             }
 
-            await Shell.Current.GoToAsync("//MainPage");
+            await Shell.Current.GoToAsync("//MainTabs");
         }
         catch (Exception ex)
         {
@@ -70,6 +73,7 @@ public partial class LoginViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToRegisterAsync()
     {
+        Console.WriteLine("=== NavigateToRegisterAsync called ===");
         await Shell.Current.GoToAsync("RegisterPage");
     }
 

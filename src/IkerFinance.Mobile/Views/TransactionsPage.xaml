@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:IkerFinance.Mobile.ViewModels"
+             xmlns:models="clr-namespace:IkerFinance.Mobile.Models"
+             x:Class="IkerFinance.Mobile.Views.TransactionsPage"
+             x:DataType="viewModels:TransactionsViewModel"
+             Title="Transactions"
+             BackgroundColor="White">
+
+    <Grid>
+        <RefreshView Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsBusy}">
+            <CollectionView ItemsSource="{Binding Transactions}"
+                            SelectionMode="None"
+                            Margin="16,16,16,80">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="20"
+                                         Spacing="10"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center">
+                        <Label Text="No transactions yet"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#6b7280"
+                               HorizontalOptions="Center" />
+                        <Label Text="Add your first transaction to get started"
+                               FontSize="14"
+                               TextColor="#9ca3af"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TransactionModel">
+                        <Frame Margin="0,0,0,12"
+                               Padding="16"
+                               BackgroundColor="White"
+                               BorderColor="#e5e7eb"
+                               CornerRadius="12"
+                               HasShadow="True">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto">
+                                <!-- Description and Category -->
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Description}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="#1f2937" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Frame Padding="6,2"
+                                               BackgroundColor="#f3f4f6"
+                                               BorderColor="Transparent"
+                                               CornerRadius="4"
+                                               HasShadow="False">
+                                            <Label Text="{Binding CategoryName}"
+                                                   FontSize="12"
+                                                   TextColor="#6b7280" />
+                                        </Frame>
+                                        <Label Text="{Binding DisplayDate}"
+                                               FontSize="12"
+                                               TextColor="#9ca3af"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <!-- Amount -->
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding DisplayAmount}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{Binding AmountColor}"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="End" />
+
+                                <!-- Notes (if available) -->
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Notes}"
+                                       FontSize="14"
+                                       TextColor="#6b7280"
+                                       Margin="0,8,0,0"
+                                       IsVisible="False" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Floating Action Button -->
+        <Button Text="+"
+                Command="{Binding AddTransactionCommand}"
+                WidthRequest="60"
+                HeightRequest="60"
+                CornerRadius="30"
+                BackgroundColor="#3b82f6"
+                TextColor="White"
+                FontSize="32"
+                FontAttributes="Bold"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,24,24" />
+    </Grid>
+
+</ContentPage>
